@@ -102,3 +102,16 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+*.sqlite
+Python/.idea/
+.idea/
+
+# Data folders
+data_*
+development.py
+production.py
+*.driveupload
+dtconfigures.sqlite
+log/
+
+logs/
