@@ -1,3 +1,13 @@
 from app import (
     app,
-)  #  a Python script at the top-level that defines the Flask application instance
+    db,
+)  #  a Python script at the top-level that defines the Flask application
+
+# instance
+
+from app.models import User, Post
+
+
+@app.shell_context_processor
+def make_shell_context():
+    return {"db": db, "User": User, "Post": Post}
