@@ -1,6 +1,6 @@
-from app import app
+from app import app, db
 from flask import render_template, flash, redirect, url_for, request
-from app.forms import LoginForm
+from app.forms import LoginForm, RegistrationForm
 from flask_login import current_user, login_user, logout_user, login_required
 from app.models import User
 from werkzeug.urls import url_parse
@@ -24,13 +24,41 @@ def index():
     ]
 
     # Return rendered template with the variables set.
-    return render_template("index.html", title="Home", user=user, posts=posts)
+    return render_template("index.html", title="Home", posts=posts)
 
 
 @app.route("/logout")
 def logout():
     logout_user()
     return redirect(url_for("index"))
+
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+    """
+    View function for the registration page.
+    :return:
+    """
+    # Redirect to index if the user is already logged in.
+    if current_user.is_authenticated:
+        return redirect(url_for("index"))
+
+    form = RegistrationForm()
+
+    # First, ensure the information contained in the form pass the validation phase.
+    if form.validate_on_submit():
+
+        # Create the user based on the data provided.
+        user = User(username=form.username.data, email=form.email.data)
+        user.set_password(form.password.data)
+
+        # Commit the information to the database.
+        db.session.add(user)
+        db.session.commit()
+        # Inform the user.
+        flash("Congratulations, you are now a registered user!")
+        return redirect(url_for("login"))
+    return render_template("register.html", title="Register", form=form)
 
 
 @app.route("/login", methods=["GET", "POST"])
@@ -67,7 +95,7 @@ def login():
         next_page = request.args.get("next")
 
         # If the login URL does not have a next argument, then the user is redirected to the index page.
-        if not next_page or url_parse(next_page).netloc != "":
+        if not next_page:
             next_page = url_for("index")
 
         # If the login URL includes a next argument that is set to a full URL that includes a domain name, then the user is redirected to the index page.
