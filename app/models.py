@@ -10,6 +10,16 @@ def load_user(id):
     return User.query.get(int(id))
 
 
+# IMPORTANT!
+# Whenever a change made below to the db.coluns etc, make sure to add a migration script. and run it.
+# e.g.
+
+# ```
+# flask db migrate -m "COMMENTS HERE"
+# flask db upgrade
+# ```
+
+
 class User(UserMixin, db.Model):
     """
     Database Model Class
@@ -21,6 +31,9 @@ class User(UserMixin, db.Model):
     email = db.Column(db.String(120), index=True, unique=True)
     password_hash = db.Column(db.String(128))
     posts = db.relationship("Post", backref="author", lazy="dynamic")
+    # new fields to be migrated
+    about_me = db.Column(db.String(140))
+    last_seen = db.Column(db.DateTime, default=datetime.utcnow)
 
     # Print object from this class
     def __repr__(self):

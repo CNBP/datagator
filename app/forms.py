@@ -7,6 +7,7 @@ from wtforms import (
     IntegerField,
     DateField,
     TimeField,
+    TextAreaField,
     MultipleFileField,
     DateTimeField,
 )
@@ -15,10 +16,16 @@ from wtforms.validators import (
     ValidationError,  # Raise Validation error if things go bad.
     Email,  # Require data to be considered email.
     EqualTo,  # Require the data to equal to another field.
+    Length,
 )
 
 
 from app.models import User
+
+"""
+This contains classes which represent a great variety of forms which collects or allow edit of a great variety of information.  
+"""
+
 
 # LoginForm class which the front end html document anticipates
 class LoginForm(FlaskForm):
@@ -65,6 +72,16 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError("Please use a different email address")
+
+
+class EditProfileForm(FlaskForm):
+    """
+    Specific form which allow people to submit the profile specific information. 
+    """
+
+    username = StringField("Username", validators=[DataRequired()])
+    about_me = TextAreaField("About me", validators=[Length(min=0, max=140)])
+    submit = SubmitField("Submit")
 
 
 class DataEntryForm(FlaskForm):

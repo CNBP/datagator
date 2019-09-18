@@ -9,6 +9,7 @@ from flask import (
 from app.forms import (
     LoginForm,  # our project customary forms built here to carry out login function.
     RegistrationForm,  # our project customary forms built here to carry out login function.
+    EditProfileForm,  # our edit profile form
 )
 from flask_login import (  # flask_login module is a module to help manage module
     current_user,  # get the active logged in user.
@@ -18,6 +19,10 @@ from flask_login import (  # flask_login module is a module to help manage modul
 )
 from app.models import User
 from werkzeug.urls import url_parse
+from datetime import datetime
+
+# This file is responsible for ROUTING the VIEW functions. What happens when you look at a page etc?
+
 
 # index page rout.
 @app.route("/")  # this indicate which endpoint these actions will be carried out.
@@ -58,6 +63,22 @@ def logout():
     return redirect(url_for("index"))
 
 
+@app.before_request
+def before_request():
+    """
+    This is executed every time before a view request happen, put something that required logging here typically
+    :return:
+    """
+    # If authenticated
+    if current_user.is_authenticated:
+
+        # Set the date column value to this.
+        current_user.last_seen = datetime.utcnow()
+
+        # Commit the information to the database.
+        db.session.commit()
+
+
 @app.route("/register", methods=["GET", "POST"])
 def register():
     """
@@ -89,6 +110,35 @@ def register():
 
     # if form not valid, redirect to register page.
     return render_template("register.html", title="Register", form=form)
+
+
+@app.route("/edit_profile", methods=["GET", "POST"])
+@login_required
+def edit_profile():
+    """
+    This allows
+    :return:
+    """
+
+    # Instantiate the form
+    form = EditProfileForm()
+
+    # If past validation, during submission,
+    if form.validate_on_submit():
+
+        # assign username, about me info
+        current_user.username = form.username.data
+        current_user.about_me = form.about_me.data
+        db.session.commit()
+        flash("Your changes have been saved.")
+        return redirect(url_for("edit_profile"))
+
+    # if it is just to get data, load from database.
+    elif request.method == "GET":
+        form.username.data = current_user.username
+        form.about_me.data = current_user.about_me
+
+    return render_template("edit_profile.html", title="Edit Profile", form=form)
 
 
 @app.route("/login", methods=["GET", "POST"])
