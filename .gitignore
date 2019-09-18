@@ -115,3 +115,5 @@ dtconfigures.sqlite
 log/
 
 logs/
+
+app.db
