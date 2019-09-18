@@ -44,14 +44,14 @@ class User(UserMixin, db.Model):
         """
         return check_password_hash(self.password_hash, password)
 
-    def avatar(self):
+    def avatar(self, size):
         """
         Return the avatar up to a particular size.
         :param size:
         :return:
         """
         digest = md5(self.email.lower().encode("utf-8")).hexdigest()
-        link = f"https://www.gravatar.com/avatar/{digest}?d=identicon&s=128"
+        link = f"https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}"
         return link
 
 

@@ -4,6 +4,11 @@ from wtforms import (
     PasswordField,  # password, hidden from view etc
     BooleanField,  #  Boolean f
     SubmitField,  # HTML button element type
+    IntegerField,
+    DateField,
+    TimeField,
+    MultipleFileField,
+    DateTimeField,
 )
 from wtforms.validators import (
     DataRequired,  # Require data to be in that filed.
@@ -60,3 +65,19 @@ class RegistrationForm(FlaskForm):
         user = User.query.filter_by(email=email.data).first()
         if user is not None:
             raise ValidationError("Please use a different email address")
+
+
+class DataEntryForm(FlaskForm):
+    """
+    This is the main form where bulk of hte data for the clinical inforamtion are entered
+    """
+
+    MRN = IntegerField("MRN*", validators=[DataRequired()])
+
+    CNBPID = StringField("CNBPID")
+    birth_weight = IntegerField("Birth Weight*", validators=[DataRequired()])
+    birth_date = DateField("Birth Date*", validators=[DataRequired()])
+    birth_time = TimeField("Birth Time")
+    mri_date = DateField("MRI Date*", validators=[DataRequired()])
+    mri_reason = StringField("Reason for MRI")
+    mri_age = IntegerField("Gestation Age (weeks)")
