@@ -121,7 +121,7 @@ def edit_profile():
     """
 
     # Instantiate the form
-    form = EditProfileForm()
+    form = EditProfileForm(current_user.username)
 
     # If past validation, during submission,
     if form.validate_on_submit():
