@@ -20,6 +20,15 @@ def load_user(id):
 # ```
 
 
+# This table has a column to track follower number 1 to follower number 2
+# This table is not a model.
+followers = db.Table(
+    "followers",
+    db.Column("follower_id", db.Integer, db.ForeignKey("user.id")),
+    db.Column("followed_id", db.Integer, db.ForeignKey("user.id")),
+)
+
+
 class User(UserMixin, db.Model):
     """
     Database Model Class
@@ -34,6 +43,29 @@ class User(UserMixin, db.Model):
     # new fields to be migrated
     about_me = db.Column(db.String(140))
     last_seen = db.Column(db.DateTime, default=datetime.utcnow)
+
+    # retrieve the list of users that this current user is following.
+    followed = db.relationship(
+        "User",  # right side entity to be linked. Left side is the parent class, which is also user.
+        secondary=followers,  # association table
+        primaryjoin=(followers.c.follower_id == id),  # left side, follower
+        secondaryjoin=(followers.c.followed_id == id),  # right side, follower
+        backref=db.backref("followers", lazy="dynamic"),
+        lazy="dynamic",
+    )
+
+    def followed_posts(self):
+
+        # Get followed posts.
+        followed = Post.query.join(
+            followers, (followers.c.followed_id == Post.user_id)
+        ).filter(followers.c.follower_id == self.id)
+
+        # Get self posts
+        own = Post.query.filter_by(user_id=self.id)
+
+        # Return the combined results ordere by post time.
+        return followed.union(own).order_by(Post.timestamp.desc())
 
     # Print object from this class
     def __repr__(self):
@@ -66,6 +98,32 @@ class User(UserMixin, db.Model):
         digest = md5(self.email.lower().encode("utf-8")).hexdigest()
         link = f"https://www.gravatar.com/avatar/{digest}?d=identicon&s={size}"
         return link
+
+    def follow(self, user):
+        """
+        Used to add a follow relationship to the other user.
+        :param user:
+        :return:
+        """
+        if not self.is_following(user):
+            self.followed.append(user)
+
+    def unfollow(self, user):
+        """
+        Used to remove a follow relationship to the other user.
+        :param user:
+        :return:
+        """
+        if self.is_following(user):
+            self.followed.remove(user)
+
+    def is_following(self, user):
+        """
+        Return the status of the is_following relationship
+        :param user:
+        :return:
+        """
+        return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
 
 class Entry(db.Model):

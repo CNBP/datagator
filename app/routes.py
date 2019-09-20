@@ -190,3 +190,60 @@ def login():
         return redirect(next_page)
 
     return render_template("login.html", title="Sign In", form=form)
+
+
+@app.route("/follow/<username>")
+@login_required
+def follow(username):
+    """
+    Follow a user provided by the username.
+    :param username:
+    :return:
+    """
+    # Check against the database.
+    user = User.query.filter_by(username=username).first()
+
+    # If doesn't exist,
+    if user is None:
+        flash(f"User {username} not found.")
+        return redirect(url_for("index"))
+    # If it is current user.
+    if user == current_user:
+        flash("You cannot follow yourself!")
+        return redirect(url_for("user", username=username))
+
+    # Commit change to database.
+    current_user.follow(user)
+    db.session.commit()
+
+    # flash and redirect.
+    flash("You are following {username}!")
+    return redirect(url_for("user", username=username))
+
+
+@app.route("/unfollow/<username>")
+@login_required
+def unfollow(username):
+    """
+    Unfollow a particular user.
+    :param username:
+    :return:
+    """
+    # Check against the database.
+    user = User.query.filter_by(username=username).first()
+
+    # If it doesn't exist
+    if user is None:
+        flash(f"User {username} not found.")
+        return redirect(url_for("index"))
+
+    # if it is the user,
+    if user == current_user:
+        flash("You cannot unfollow yourself!")
+        return redirect(url_for("user", username=username))
+
+    # unfollow user and commit to database.
+    current_user.unfollow(user)
+    db.session.commit()
+    flash("You are not following {username}")
+    return redirect(url_for("user", username=username))
