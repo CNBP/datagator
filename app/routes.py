@@ -10,46 +10,70 @@ from app.forms import (
     LoginForm,  # our project customary forms built here to carry out login function.
     RegistrationForm,  # our project customary forms built here to carry out login function.
     EditProfileForm,  # our edit profile form
+    PostForm,  # our form about post editing
 )
+
 from flask_login import (  # flask_login module is a module to help manage module
     current_user,  # get the active logged in user.
     login_user,  # login the user action.
     logout_user,  # used to logout user
     login_required,  # used to @login_required decorator to indicate a route MUST be logged in before showing.
 )
-from app.models import User
+from app.models import User, Post  # import data base model for User and Post construct.
 from werkzeug.urls import url_parse
 from datetime import datetime
 
-# This file is responsible for ROUTING the VIEW functions. What happens when you look at a page etc?
 
+"""
+This file is responsible for ROUTING the VIEW functions. What happens when you look at a page etc?
+
+Any view needs to be defined here. 
+
+"""
 
 # index page rout.
-@app.route("/")  # this indicate which endpoint these actions will be carried out.
-@app.route("/index")  # this indicate which endpoint these actions will be carried out.
+@app.route(
+    "/", methods=["GET", "POST"]
+)  # this indicate which endpoint these actions will be carried out.
+@app.route(
+    "/index", methods=["GET", "POST"]
+)  # this indicate which endpoint these actions will be carried out.
 @login_required  # this marks the page as login required.
 def index():
 
-    # The main function that was executed.
-    user = {"username": "Data Structure"}
+    form = PostForm()
 
-    posts = [
-        {"author": {"username": "John"}, "body": "Nice!"},
-        {"author": {"username": "Susan"}, "body": "Averages!"},
-    ]
+    # If form past validation, update the database with the post information and notify user while redirect to current page.
+    if form.validate_on_submit():
+        post = Post(body=form.post.data, author=current_user)
+        db.session.add(post)
+        db.session.commit()
+        flash("Your post is now live!")
+        return redirect(url_for("index"))
+
+    posts = current_user.followed_posts().all()
 
     # Return rendered template with the variables set.
-    return render_template("index.html", title="Home", posts=posts)
+    # Post > Redirect > Get pattern.
+    return render_template(
+        "index.html", title="Home, Sweet Home!", form=form, posts=posts
+    )
 
 
 @app.route("/user/<username>")
 @login_required
 def user(username):
+    """
+    This shows the information for the relevant username.
+    :param username:
+    :return:
+    """
     user = User.query.filter_by(username=username).first_or_404()
     posts = [
         {"author": user, "body": "Test post #1"},
         {"author": user, "body": "Test post #2"},
     ]
+    # Post > Redirect > Get pattern.
     return render_template("user.html", user=user, posts=posts)
 
 
@@ -247,3 +271,14 @@ def unfollow(username):
     db.session.commit()
     flash("You are not following {username}")
     return redirect(url_for("user", username=username))
+
+
+@app.route("/explore")
+@login_required
+def explore():
+    """
+    Explore the global posts stream
+    :return:
+    """
+    posts = Post.query.order_by(Post.timestamp.desc()).all()
+    return render_template("index.html", title="Explore", posts=posts)

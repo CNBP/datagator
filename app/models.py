@@ -55,7 +55,10 @@ class User(UserMixin, db.Model):
     )
 
     def followed_posts(self):
-
+        """
+        This method returns all the posts of this user currently follows.
+        :return:
+        """
         # Get followed posts.
         followed = Post.query.join(
             followers, (followers.c.followed_id == Post.user_id)

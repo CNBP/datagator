@@ -1,23 +1,32 @@
+<!--Base template for all HTML-->
 <html>
     <head>
-      {% if title %}
-      <title>{{ title }} - Microblog</title>
-      {% else %}
-      <title>Welcome to Microblog</title>
-      {% endif %}
+        <!--Default template for all unless previously specified-->
+        {% if title %}
+            <title>{{ title }} - Microblog</title>
+        {% else %}
+            <title>Welcome to Microblog</title>
+        {% endif %}
     </head>
     <body>
+        <!--Main Pre-content Info Block-->
         <div>
+            <!--Links always visible. -->
             Microblog:
             <a href="{{ url_for('index') }}">Home</a>
+            <!---->
             {% if current_user.is_anonymous %}
                 <a href="{{ url_for('login') }}">Login</a>
             {% else %}
+                <!--Links only visible post login-->
                 <a href="{{ url_for('user', username=current_user.username) }}">Profile</a>
-            <a href="{{ url_for('logout')}}">Logout</a>
+                <a href="{{ url_for('explore') }}">Explore Posts</a>
+                <a href="{{ url_for('logout')}}">Logout</a>
             {% endif %}
+
         </div>
         <hr>
+        <!--Show flashed messages here if any. -->
         {% with messages = get_flashed_messages() %}
             {% if messages %}
             <ul>
@@ -27,6 +36,9 @@
             </ul>
             {% endif %}
         {% endwith %}
+
+        <!--The actual content block!-->
         {% block content %}{% endblock %}
+
     </body>
 </html>

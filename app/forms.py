@@ -116,3 +116,14 @@ class DataEntryForm(FlaskForm):
     mri_date = DateField("MRI Date*", validators=[DataRequired()])
     mri_reason = StringField("Reason for MRI")
     mri_age = IntegerField("Gestation Age (weeks)")
+
+
+class PostForm(FlaskForm):
+    """
+    This form is about Blog Posts
+    """
+
+    post = TextAreaField(
+        "Say something nice!", validators=[DataRequired(), Length(min=1, max=140)]
+    )
+    submit = SubmitField("Submit")

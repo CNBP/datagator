@@ -1,8 +1,35 @@
 {% extends "base.html" %}
 
 {% block content %}
+
     <h1>Hi, {{ current_user.username }}!</h1>
+
+    <!--Displayed only when there is form. -->
+    {% if form %}
+        <!--Only can post, not get. -->
+        <form action ="" method="post">
+            {{ form.hidden_tag() }}
+
+            <p>
+                <!--Place to accept information to create post -->
+                {{ form.post.label }}<br>
+                {{ form.post(cols=32,rows=4)}}<br>
+
+                <!--Standard error block-->
+                {% for error in form.post.erros %}
+                    <span style="color: red;">[{{ error }}]</span>
+                {% endfor %}
+            </p>
+
+            <!--Submit button. -->
+            <p>{{ form.submit() }}</p>
+
+        </form>
+    {% endif %}
+
+    <!--Loop through all posts and include EACH using the _post subtemplate-->
     {% for post in posts %}
-    <div><p>{{ post.author.username }} says: <b>{{ post.body }}</b></p></div>
+        {% include '_post.html' %}
     {% endfor %}
+
 {% endblock %}
