@@ -32,4 +32,14 @@
         {% include '_post.html' %}
     {% endfor %}
 
+    <!--Pagination Handle, recall it is from NEWEST to OLDEST-->
+    {% if prev_url %}
+        <a href="{{ prev_url }}">Newer posts</a>
+    {% endif %}
+
+    {% if next_url %}
+        <a href="{{ next_url }}">Older Posts</a>
+    {% endif %}
+
 {% endblock %}
+

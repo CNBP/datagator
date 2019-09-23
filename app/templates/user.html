@@ -3,12 +3,21 @@
 {% block content %}
     <table>
         <tr valign="top">
+            <!--User Content-->
             <td><img src="{{ user.avatar(128) }}"></td>
             <td>
                 <h1>User: {{ user.username }}</h1>
+
+                <!--About me section-->
                 {% if user.about_me %}<p>{{ user.about_me }}</p>{% endif %}
+
+                <!--Last Seen section -->
                 {% if user.last_see %}<p>{{ user.last_seen }}</p>{% endif %}
+
+                <!--Show the follower/followed count-->
                 <p>{{ user.followers.count() }} followers, {{ user.followed.count() }} following.</p>
+
+                <!--Allow edit, follow or unfollow-->
                 {% if user == current_user %}
                     <p><a href="{{ url_for('edit_profile')}}">Edit your profile</a></p>
                 {% elif not current_user.is_following(user) %}
@@ -20,7 +29,20 @@
         </tr>
     </table>
     <hr>
+
+    <!--Show all posts past as an argument-->
     {% for post in posts %}
         {% include '_post.html' %}
     {% endfor %}
+
+    <!--Pagination Links-->
+    {% if prev_url %}
+        <a href="{{ prev_url }}">Newer Posts</a>
+    {% endif %}
+
+    {% if next_url %}
+        <a href="{{ next_url }}">Older Posts</a>
+    {% endif %}
+
+
 {% endblock %}
