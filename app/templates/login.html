@@ -18,6 +18,7 @@
                 <span style="color: red;">[{{error}}]</span>
             {% endfor %}
         </p>
+
         <p>
             <!--Password field-->
             {{ form.password.label }}<br>
@@ -34,6 +35,12 @@
 
         <!--Submit button-->
         <p>{{ form.submit() }}</p>
+
+        <!--Password reset area-->
+        <p>
+            Forgot Your Password?
+            <a href="{{ url_for('reset_password_request') }}">Click to Reset It</a>
+        </p>
 
     </form>
 

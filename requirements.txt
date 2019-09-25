@@ -1,0 +1,8 @@
+flask-mail
+pyjwt
+werkzeug
+wtforms
+flask_login
+flask-migrate
+flask-sqlalchemy
+flask-wtf

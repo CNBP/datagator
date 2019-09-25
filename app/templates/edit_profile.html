@@ -7,7 +7,7 @@
         {{ form.hidden_tag() }}
 
         <p>
-            <!--Display username info. -->
+            <!--Allow username entry label field. -->
             {{ form.username.label }}<br>
             {{ form.username(size=32) }}<br>
 
@@ -17,7 +17,7 @@
             {% endfor %}
         </p>
         <p>
-            <!--Text entry field-->
+            <!--Text entry label field-->
             {{ form.about_me.label }}<br>
             {{ form.about_me(cols=50, rows=4) }} <br>
 

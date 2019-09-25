@@ -1,8 +1,10 @@
-from app import db, login
+from app import db, login, app
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
 from hashlib import md5
+import jwt
+from time import time
 
 
 @login.user_loader
@@ -27,6 +29,20 @@ followers = db.Table(
     db.Column("follower_id", db.Integer, db.ForeignKey("user.id")),
     db.Column("followed_id", db.Integer, db.ForeignKey("user.id")),
 )
+
+
+class Post(db.Model):
+    """
+    This is the post class, used to model the data brought on
+    """
+
+    id = db.Column(db.Integer, primary_key=True)
+    body = db.Column(db.String(140))
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
+
+    def __repr__(self):
+        return "<Post {}>".format(self.body)
 
 
 class User(UserMixin, db.Model):
@@ -128,6 +144,33 @@ class User(UserMixin, db.Model):
         """
         return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
+    def get_reset_password_token(self, expires_in=600):
+        """
+        Get reset token, with the id encoded and expiring time.
+        :param expires_in:
+        :return:
+        """
+        return jwt.encode(
+            {"reset_password": self.id, "exp": time() + expires_in},
+            app.config["SECRET_KEY"],
+            algorithm="HS256",
+        ).decode("utf-8")
+
+    @staticmethod
+    def verify_reset_password_token(token):
+        """
+        Verify the token then return UserID as authenticated.
+        :param token:
+        :return:
+        """
+        try:
+            id = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])[
+                "reset_password"
+            ]  # get the value from that dictionary.
+        except:
+            return
+        return User.query.get(id)
+
 
 class Entry(db.Model):
     """
@@ -153,17 +196,3 @@ class Entry(db.Model):
 
     def __repr__(self):
         return "<Entry {}>".format(self.body)
-
-
-class Post(db.Model):
-    """
-    This is the post class, used to model the data brought on
-    """
-
-    id = db.Column(db.Integer, primary_key=True)
-    body = db.Column(db.String(140))
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
-    user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
-
-    def __repr__(self):
-        return "<Post {}>".format(self.body)
