@@ -185,11 +185,12 @@ class Entry(db.Model):
     birth_time = db.Column(db.Time)
     mri_date = db.Column(db.Date)
     mri_reason = db.Column(db.String)
+    mri_age = db.Column(db.String)
 
     # Many more fields to add here.
-    mri_dx = db.Column(db.String)
-
+    mri_dx = db.Column(db.String)  # JSON string
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
     user_id = db.Column(
         db.Integer, db.ForeignKey("user.id")
     )  # used to associate who entered this entry.

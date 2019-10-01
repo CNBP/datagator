@@ -10,6 +10,7 @@ from wtforms import (
     TextAreaField,
     MultipleFileField,
     DateTimeField,
+    SelectMultipleField,
 )
 from wtforms.validators import (
     DataRequired,  # Require data to be in that filed.
@@ -102,20 +103,33 @@ class EditProfileForm(FlaskForm):
                 raise ValidationError("Please use a different username.")
 
 
-class DataEntryForm(FlaskForm):
+class NeonatialDataForm(FlaskForm):
     """
-    This is the main form where bulk of hte data for the clinical inforamtion are entered
+    This is the main form where bulk of the data for the clinical inforamtion are entered
     """
+
+    choics_diagnoses = [
+        ("d0", "No Diagnoses, Healthy."),
+        ("d1", "Diagnosis 1"),
+        ("d2", "Diagnosis 2"),
+        ("d3", "Diagnosis 3"),
+        ("d4", "Diagnosis 4"),
+        ("d5", "Diagnosis 5"),
+        ("d6", "Diagnosis 6"),
+        ("d7", "Diagnosis 7"),
+    ]
 
     MRN = IntegerField("MRN*", validators=[DataRequired()])
-
     CNBPID = StringField("CNBPID")
     birth_weight = IntegerField("Birth Weight*", validators=[DataRequired()])
     birth_date = DateField("Birth Date*", validators=[DataRequired()])
     birth_time = TimeField("Birth Time")
     mri_date = DateField("MRI Date*", validators=[DataRequired()])
-    mri_reason = StringField("Reason for MRI")
+    mri_reason = SelectMultipleField("Reason for MRI", choices=choics_diagnoses)
     mri_age = IntegerField("Gestation Age (weeks)")
+    submit = SubmitField("Submit")
+
+    # should we check MRN unique ness? NO
 
 
 class PostForm(FlaskForm):

@@ -13,6 +13,7 @@ from app.forms import (
     PostForm,  # our form about post editing
     ResetPasswordRequestForm,  # the form that can REQUEST the reset the password
     ResetPasswordForm,  # the form that is actually resetting the password
+    NeonatialDataForm,
 )
 
 from flask_login import (  # flask_login module is a module to help manage module
@@ -21,7 +22,11 @@ from flask_login import (  # flask_login module is a module to help manage modul
     logout_user,  # used to logout user
     login_required,  # used to @login_required decorator to indicate a route MUST be logged in before showing.
 )
-from app.models import User, Post  # import data base model for User and Post construct.
+from app.models import (
+    User,
+    Post,
+    Entry,
+)  # import data base model for User and Post construct.
 from werkzeug.urls import url_parse
 from datetime import datetime
 from app.email import send_password_reset_email
@@ -178,8 +183,7 @@ def register():
 @login_required
 def edit_profile():
     """
-    This allows
-    :return:
+    This allows editing of the profile.
     """
 
     # Instantiate the form
@@ -368,6 +372,84 @@ def reset_password_request():
     return render_template(
         "reset_password_request.html", title="Reset Password", form=form
     )
+
+
+@login_required
+@app.route("/data_entry/", methods=["GET", "POST"])
+def data_entry():
+    """
+    View function where the editing of the actual functions happen.
+    :return:
+    """
+    # Instantiate the form
+    form = NeonatialDataForm()
+
+    # If past validation, during submission,
+    if form.validate_on_submit():
+
+        # Create the ENTRY model data
+        entry = Entry(
+            MRN=form.MRN.data,
+            CNBPID=form.CNBPID.data,
+            birth_weight=form.birth_weight.data,
+            birth_date=form.birth_date.data,
+            birth_time=form.birth_time.data,
+            mri_date=form.mri_date.data,
+            mri_reason=form.mri_reason.data,
+            mri_age=form.mri_age.data,
+        )
+        db.session.add(entry)
+        db.session.commit()
+
+        # Notify the issue.
+        flash("Your data entry has been successfully written to the database.")
+        return redirect(url_for("index"))
+
+    return render_template("data_entry.html", title="Add a Data Entry", form=form)
+
+
+@login_required
+@app.route("/data_view/<id>", methods=["GET"])
+def data_view():
+    """
+    View function where the editing of the actual functions happen.
+    :return:
+    """
+    pass
+    """
+    
+    # Instantiate the form
+    form = NeonatialDataForm()
+
+    # If past validation, during submission,
+    if form.validate_on_submit():
+
+        # Create the ENTRY model data
+        entry = Entry(
+            MRN=form.MRN.data,
+            CNBPID=form.CNBPID.data,
+            birth_weight=form.birth_weight.data,
+            birth_date=form.birth_date.data,
+            birth_time=form.birth_time.data,
+            mri_date=form.mri_date.data,
+            mri_reason=form.mri_reason.data,
+            mri_age=form.mri_age.data,
+        )
+        db.session.add(entry)
+        db.session.commit()
+
+        # Notify the issue.
+        flash("Your data entry has been successfully written to the database.")
+        return redirect(url_for("index"))
+
+    return render_template("data_entry.html", title="Add a Data Entry", form=form)
+    """
+
+
+@login_required
+@app.route("/data_view/<id>", methods=["GET", "POST"])
+def data_update():
+    pass
 
 
 @app.route("/reset_password/<token>", methods=["GET", "POST"])
