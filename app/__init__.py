@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
+from flask_moment import Moment
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
@@ -22,6 +23,7 @@ migrate = Migrate(app, db)
 mail = Mail(app)
 bootstrap = Bootstrap(app)
 login = LoginManager(app)  # Instnatiate the LoginManager for this current app.
+moment = Moment(app)
 
 # The page to direct people to login if they are required.
 login.login_view = "login"

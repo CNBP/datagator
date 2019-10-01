@@ -1,5 +1,12 @@
 {% extends 'bootstrap/base.html' %}
 
+<!--Script Block for UTC timing. add the moment.js library, without losing the base contents-->
+<!--SUPER keep the base template contents-->
+{% block scripts %}
+    {{ super() }}
+    {{ moment.include_moment() }}
+{% endblock %}
+
 <!--Title Block-->
 {% block titile %}
     {% if titile %}{{ titile }} - Microblog {% else %}Welcome to Microblog {% endif %}
