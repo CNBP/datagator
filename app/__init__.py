@@ -4,6 +4,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import LoginManager
 from flask_mail import Mail
+from flask_bootstrap import Bootstrap
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
@@ -14,11 +15,13 @@ logger = logging.getLogger()
 
 # Load configuration from the object class.
 app.config.from_object(Config)
+
+# Initialize the VARIOUS INSTANCES of PLUGINS by passing the app context to them
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 mail = Mail(app)
-# Instnatiate the LoginManager for this current app.
-login = LoginManager(app)
+bootstrap = Bootstrap(app)
+login = LoginManager(app)  # Instnatiate the LoginManager for this current app.
 
 # The page to direct people to login if they are required.
 login.login_view = "login"
