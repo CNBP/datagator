@@ -19,3 +19,4 @@ class Config(object):
     MAIL_PASSWORD = os.environ.get("MAIL_PASSWORD")
     ADMINS = ["it@cnbp.ca"]
     POSTS_PER_PAGE = 3
+    LANGUAGE = ["en-CA", "fr-CA"]

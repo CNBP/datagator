@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from config import Config
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
@@ -6,6 +6,7 @@ from flask_login import LoginManager
 from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
+from flask_babel import Babel
 import logging
 from logging.handlers import SMTPHandler, RotatingFileHandler
 import os
@@ -24,7 +25,7 @@ mail = Mail(app)
 bootstrap = Bootstrap(app)
 login = LoginManager(app)  # Instnatiate the LoginManager for this current app.
 moment = Moment(app)
-
+babel = Babel(app)
 # The page to direct people to login if they are required.
 login.login_view = "login"
 
@@ -74,3 +75,8 @@ if not app.debug:
 
 else:
     logger.debug("App is currently in debug mode and no email has been sent")
+
+
+@babel.localeselector
+def get_locale():
+    return request.accept_languages.best_match(app.config["LANGUAGES"])
