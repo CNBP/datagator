@@ -76,7 +76,8 @@ if not app.debug:
 else:
     logger.debug("App is currently in debug mode and no email has been sent")
 
-
+"""
 @babel.localeselector
 def get_locale():
     return request.accept_languages.best_match(app.config["LANGUAGES"])
+"""

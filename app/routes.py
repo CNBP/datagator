@@ -13,7 +13,11 @@ from app.forms import (
     PostForm,  # our form about post editing
     ResetPasswordRequestForm,  # the form that can REQUEST the reset the password
     ResetPasswordForm,  # the form that is actually resetting the password
-    NeonatialDataForm,
+)
+from app.forms_entries import (
+    NeonatalDataForm_Submit,
+    NeonatalDataForm_Update,
+    RequestEntryForm,
 )
 
 from flask_login import (  # flask_login module is a module to help manage module
@@ -38,6 +42,11 @@ This file is responsible for ROUTING the VIEW functions. What happens when you l
 Any view needs to be defined here. 
 
 """
+
+import logging
+
+logger = logging.getLogger()
+logging.basicConfig(level=logging.INFO)
 
 # index page rout.
 @app.route(
@@ -96,7 +105,7 @@ def user(username):
     # set user
     user = User.query.filter_by(username=username).first_or_404()
 
-    # set urrent pagination limit
+    # set current pagination limit
     page = request.args.get("page", 1, type=int)
 
     posts = user.posts.order_by(Post.timestamp.desc()).paginate(
@@ -382,8 +391,8 @@ def data_entry():
     :return:
     """
     # Instantiate the form
-    form = NeonatialDataForm()
-
+    form = NeonatalDataForm_Submit()
+    form.submit.render_kw = {"enabled": ""}
     # If past validation, during submission,
     if form.validate_on_submit():
 
@@ -395,7 +404,7 @@ def data_entry():
             birth_date=form.birth_date.data,
             birth_time=form.birth_time.data,
             mri_date=form.mri_date.data,
-            mri_reason=form.mri_reason.data,
+            mri_reason=str(form.mri_reason.data),
             mri_age=form.mri_age.data,
         )
         db.session.add(entry)
@@ -409,47 +418,69 @@ def data_entry():
 
 
 @login_required
-@app.route("/data_view/<id>", methods=["GET"])
-def data_view():
+@app.route("/data_request/", methods=["POST", "GET"])
+def data_request():
+    """
+    The place to place a request to view data ENTRY form. 
+    :return:
+    """
+    form = RequestEntryForm()
+    if form.validate_on_submit():
+        id_form = int(form.id.data)
+        logger.info(id_form)
+        logger.info("Reached here!")
+        flash(f"Requesting entry data from ID={str(id_form)}.")
+        return redirect(url_for("data_view", id_entry=id_form))
+    return render_template("data_view.html", title="Load a Data Entry", form=form)
+
+
+@login_required
+@app.route("/data_view/<id_entry>", methods=["GET", "POST"])
+def data_view(id_entry):
     """
     View function where the editing of the actual functions happen.
     :return:
     """
-    pass
-    """
-    
-    # Instantiate the form
-    form = NeonatialDataForm()
+    form = NeonatalDataForm_Update()
+    # Entry ID based on the parameter passed to the page
+    entry_data = Entry.query.filter_by(id=id_entry).first()
+    if entry_data is None:
+        flash("No suitable data found.")
+    else:
+        form = NeonatalDataForm_Update()
+        form.MRN.data = entry_data.MRN
+        form.CNBPID.data = entry_data.CNBPID
+        form.birth_weight.data = entry_data.birth_weight
+        form.birth_date.data = entry_data.birth_date
+        form.birth_time.data = entry_data.birth_time
+        form.mri_date.data = entry_data.mri_date
+        form.mri_reason.data = entry_data.mri_reason
+        form.mri_age.data = entry_data.mri_age
+        # form.submit.render_kw = {"disabled": "disabled"}
+        # form.submit(disabled=True, readonly=True)
+        flash("Your data entry has been successfully loaded from the database.")
 
-    # If past validation, during submission,
-    if form.validate_on_submit():
+        # If past validation, during submission,
+        if form.validate_on_submit() and form.update_entry.data:
+            # Update.ENTRY model data
+            entry_data.MRN = form.MRN.data
+            entry_data.CNBPID = form.CNBPID.data
+            entry_data.birth_weight = form.birth_weight.data
+            entry_data.birth_date = form.birth_date.data
+            entry_data.birth_time = form.birth_time.data
+            entry_data.mri_date = form.mri_date.data
+            entry_data.mri_reason = str(form.mri_reason.data)
+            entry_data.mri_age = form.mri_age.data
+            db.session.commit()
 
-        # Create the ENTRY model data
-        entry = Entry(
-            MRN=form.MRN.data,
-            CNBPID=form.CNBPID.data,
-            birth_weight=form.birth_weight.data,
-            birth_date=form.birth_date.data,
-            birth_time=form.birth_time.data,
-            mri_date=form.mri_date.data,
-            mri_reason=form.mri_reason.data,
-            mri_age=form.mri_age.data,
-        )
-        db.session.add(entry)
-        db.session.commit()
+            # Notify the issue.
+            flash("Your data entry has been successfully written to the database.")
+        elif form.delete_entry.data:
+            # Notify the issue.
+            flash("Mock deleting this entry")
 
-        # Notify the issue.
-        flash("Your data entry has been successfully written to the database.")
-        return redirect(url_for("index"))
-
-    return render_template("data_entry.html", title="Add a Data Entry", form=form)
-    """
-
-
-@login_required
-@app.route("/data_view/<id>", methods=["GET", "POST"])
-def data_update():
-    pass
+    # Post > Redirect > Get pattern.
+    return render_template("data_view.html", form=form)
 
 
 @app.route("/reset_password/<token>", methods=["GET", "POST"])

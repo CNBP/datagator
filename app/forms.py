@@ -4,13 +4,7 @@ from wtforms import (
     PasswordField,  # password, hidden from view etc
     BooleanField,  #  Boolean f
     SubmitField,  # HTML button element type
-    IntegerField,
-    DateField,
-    TimeField,
     TextAreaField,
-    MultipleFileField,
-    DateTimeField,
-    SelectMultipleField,
 )
 from wtforms.validators import (
     DataRequired,  # Require data to be in that filed.
@@ -19,7 +13,6 @@ from wtforms.validators import (
     EqualTo,  # Require the data to equal to another field.
     Length,
 )
-
 
 from app.models import User
 
@@ -85,7 +78,11 @@ class EditProfileForm(FlaskForm):
     submit = SubmitField("Submit")
 
     def __init__(self, original_username, *args, **kwargs):
+
+        # At the time of initialization
         super(EditProfileForm, self).__init__(*args, **kwargs)
+
+        # Store the self.original_username varaible with the initialized username variable.
         self.original_username = original_username
 
     def validate_username(self, username):
@@ -101,35 +98,6 @@ class EditProfileForm(FlaskForm):
             # If any exist, raise error.
             if user is not None:
                 raise ValidationError("Please use a different username.")
-
-
-class NeonatialDataForm(FlaskForm):
-    """
-    This is the main form where bulk of the data for the clinical inforamtion are entered
-    """
-
-    choics_diagnoses = [
-        ("d0", "No Diagnoses, Healthy."),
-        ("d1", "Diagnosis 1"),
-        ("d2", "Diagnosis 2"),
-        ("d3", "Diagnosis 3"),
-        ("d4", "Diagnosis 4"),
-        ("d5", "Diagnosis 5"),
-        ("d6", "Diagnosis 6"),
-        ("d7", "Diagnosis 7"),
-    ]
-
-    MRN = IntegerField("MRN*", validators=[DataRequired()])
-    CNBPID = StringField("CNBPID")
-    birth_weight = IntegerField("Birth Weight*", validators=[DataRequired()])
-    birth_date = DateField("Birth Date*", validators=[DataRequired()])
-    birth_time = TimeField("Birth Time")
-    mri_date = DateField("MRI Date*", validators=[DataRequired()])
-    mri_reason = SelectMultipleField("Reason for MRI", choices=choics_diagnoses)
-    mri_age = IntegerField("Gestation Age (weeks)")
-    submit = SubmitField("Submit")
-
-    # should we check MRN unique ness? NO
 
 
 class PostForm(FlaskForm):

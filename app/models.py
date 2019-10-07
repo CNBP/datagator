@@ -13,7 +13,7 @@ def load_user(id):
 
 
 # IMPORTANT!
-# Whenever a change made below to the db.coluns etc, make sure to add a migration script. and run it.
+# Whenever a change made below to the db.columns etc, make sure to add a migration script. and run it.
 # e.g.
 
 # ```
