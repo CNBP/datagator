@@ -13,8 +13,7 @@ from wtforms import (
     BooleanField,
 )
 from wtforms.validators import DataRequired
-
-from app.models import Entry
+from app.models import Entry, User
 
 choics_diagnoses = [
     ("d0", "No Diagnoses, Healthy."),
@@ -74,17 +73,36 @@ class RequestEntryForm(FlaskForm):
 
     submit = SubmitField("Load Entry")
 
+    def __init__(self, current_username, *args, **kwargs):
+        # At the time of initialization
+        super(RequestEntryForm, self).__init__(*args, **kwargs)
+
+        # Store the input into class variable.
+        self.username = current_username
+
     def validate_id(self, id):
         """
         Validation function to ensure such entries exist.
         :param username:
         :return:
         """
+        entries_desired = Entry.query.filter_by(id=id.data)
+
         # check the database to see if such user name already exist
-        entry = Entry.query.filter_by(id=id.data).scalar() is not None
-        # If any exist, raise error.
+        entry = entries_desired.scalar() is not None
+        # Entry does not exist!
         if not entry:
-            raise ValidationError("No loadable records were found")
+            raise ValidationError(
+                "No loadable records were found. Maybe it did not exist OR you do not have permission to view it?"
+            )
+
+        # Check the current user name ID, validate it against the creation ID.
+        user_current = User.query.filter_by(username=self.username).first_or_500()
+        # Check if they are the same
+        if entries_desired.first().user_id != user_current.id:
+            raise ValidationError(
+                "No loadable records were found! Maybe it did not exist OR you do not have permission to view it."
+            )
 
 
 class NeonatalDataFormMixins(FlaskForm):
@@ -117,7 +135,7 @@ class NeonatalDataFormMixins(FlaskForm):
     )
 
     mri_reason = SelectMultipleField(
-        "Reason for MRI* (Ctrl = multi-select, Shift = batch-select) ",
+        "Reason for MRI* \n (Ctrl = multi-select, Shift = batch-select) ",
         validators=[DataRequired("A reason must be specified.")],
         choices=choics_diagnoses,
     )
@@ -221,10 +239,18 @@ class NeonatalDataFormMixins(FlaskForm):
 
 
 class NeonatalDataForm_Submit(NeonatalDataFormMixins):
+    """
+    This is an extended class of the base form. This is for the submission purpsoe.
+    """
+
     submit_entry = SubmitField("Submit")
 
 
 class NeonatalDataForm_Update(NeonatalDataFormMixins):
+    """
+    This is an extended class of the base form. This is for the update and deletion purpsoe.
+    """
+
     update_entry = SubmitField("Update")
 
     confirm_delete = BooleanField("Confirm Delete?")

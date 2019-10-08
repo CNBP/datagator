@@ -395,6 +395,11 @@ def data_entry():
     # If past validation, during submission,
     if form.validate_on_submit():
 
+        # Retrieve from database the row that contain the user name.
+        user_current = User.query.filter_by(
+            username=current_user.username
+        ).first_or_404()
+
         # Create the ENTRY model data
         entry = Entry(
             MRN=form.MRN.data,
@@ -405,6 +410,7 @@ def data_entry():
             mri_date=form.mri_date.data,
             mri_reason=json.dumps(form.mri_reason.data),
             mri_age=form.mri_age.data,
+            user_id=user_current.id,
         )
         db.session.add(entry)
         db.session.commit()
@@ -423,7 +429,7 @@ def data_request():
     The place to place a request to view data ENTRY form. 
     :return:
     """
-    form = RequestEntryForm()
+    form = RequestEntryForm(current_user.username)
     if form.validate_on_submit():
         id_form = int(form.id.data)
         logger.info(id_form)
