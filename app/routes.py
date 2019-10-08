@@ -34,7 +34,7 @@ from app.models import (
 from werkzeug.urls import url_parse
 from datetime import datetime
 from app.email import send_password_reset_email
-
+import json
 
 """
 This file is responsible for ROUTING the VIEW functions. What happens when you look at a page etc?
@@ -392,7 +392,6 @@ def data_entry():
     """
     # Instantiate the form
     form = NeonatalDataForm_Submit()
-    form.submit.render_kw = {"enabled": ""}
     # If past validation, during submission,
     if form.validate_on_submit():
 
@@ -404,7 +403,7 @@ def data_entry():
             birth_date=form.birth_date.data,
             birth_time=form.birth_time.data,
             mri_date=form.mri_date.data,
-            mri_reason=str(form.mri_reason.data),
+            mri_reason=json.dumps(form.mri_reason.data),
             mri_age=form.mri_age.data,
         )
         db.session.add(entry)
@@ -412,7 +411,7 @@ def data_entry():
 
         # Notify the issue.
         flash("Your data entry has been successfully written to the database.")
-        return redirect(url_for("index"))
+        # return redirect(url_for("index"))
 
     return render_template("data_entry.html", title="Add a Data Entry", form=form)
 
@@ -441,43 +440,64 @@ def data_view(id_entry):
     View function where the editing of the actual functions happen.
     :return:
     """
+
+    # Instantiate the form with NO default values.
     form = NeonatalDataForm_Update()
-    # Entry ID based on the parameter passed to the page
+
+    # Instantiate the data object from the SQL records.
     entry_data = Entry.query.filter_by(id=id_entry).first()
+
+    # No data found path:
+    # Entry ID based on the parameter passed to the page
     if entry_data is None:
         flash("No suitable data found.")
+
+    # Deletion path: delete the database entry.
+    elif form.delete_entry.data:
+        # Only delete when all set.
+        if (
+            form.delete_entry.data
+            and form.confirm_delete.data
+            and form.confirm_double_delete.data
+        ):
+            flash(f"Deleting this entry{id_entry}")
+            Entry.query.filter_by(id=id_entry).delete()
+            db.session.commit()
+            flash(f"Entry {id_entry} deleted!")
+            return redirect(url_for("data_request"))
+        else:
+            flash("Deletion aborted due to insufficient confirmation")
+
+    # Update info path:
+    # If past validation and submitted, commit to database.
+    elif form.validate_on_submit() and form.update_entry.data:
+        # Update.ENTRY model data
+        entry_data.MRN = form.MRN.data
+        entry_data.CNBPID = form.CNBPID.data
+        entry_data.birth_weight = form.birth_weight.data
+        entry_data.birth_date = form.birth_date.data
+        entry_data.birth_time = form.birth_time.data
+        entry_data.mri_date = form.mri_date.data
+        entry_data.mri_reason = json.dumps(form.mri_reason.data)
+        entry_data.mri_age = form.mri_age.data
+        db.session.commit()
+
+        # Notify the issue.
+        flash(f"Data entry {id_entry} has been successfully updated to the database!")
+    # Data found path:
     else:
-        form = NeonatalDataForm_Update()
-        form.MRN.data = entry_data.MRN
+        form.MRN.data = int(entry_data.MRN)
         form.CNBPID.data = entry_data.CNBPID
-        form.birth_weight.data = entry_data.birth_weight
+        form.birth_weight.data = float(entry_data.birth_weight)
         form.birth_date.data = entry_data.birth_date
         form.birth_time.data = entry_data.birth_time
         form.mri_date.data = entry_data.mri_date
-        form.mri_reason.data = entry_data.mri_reason
-        form.mri_age.data = entry_data.mri_age
+        form.mri_age.data = float(entry_data.mri_age)
         # form.submit.render_kw = {"disabled": "disabled"}
         # form.submit(disabled=True, readonly=True)
-        flash("Your data entry has been successfully loaded from the database.")
+        form.mri_reason.data = json.loads(entry_data.mri_reason)
 
-        # If past validation, during submission,
-        if form.validate_on_submit() and form.update_entry.data:
-            # Update.ENTRY model data
-            entry_data.MRN = form.MRN.data
-            entry_data.CNBPID = form.CNBPID.data
-            entry_data.birth_weight = form.birth_weight.data
-            entry_data.birth_date = form.birth_date.data
-            entry_data.birth_time = form.birth_time.data
-            entry_data.mri_date = form.mri_date.data
-            entry_data.mri_reason = str(form.mri_reason.data)
-            entry_data.mri_age = form.mri_age.data
-            db.session.commit()
-
-            # Notify the issue.
-            flash("Your data entry has been successfully written to the database.")
-        elif form.delete_entry.data:
-            # Notify the issue.
-            flash("Mock deleting this entry")
+        flash(f"Data entry {id_entry} has been successfully loaded from the database.")
 
     # Post > Redirect > Get pattern.
     return render_template("data_view.html", form=form)

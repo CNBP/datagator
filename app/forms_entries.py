@@ -10,6 +10,7 @@ from wtforms import (
     SelectMultipleField,
     SubmitField,
     ValidationError,
+    BooleanField,
 )
 from wtforms.validators import DataRequired
 
@@ -116,7 +117,7 @@ class NeonatalDataFormMixins(FlaskForm):
     )
 
     mri_reason = SelectMultipleField(
-        "Reason for MRI*",
+        "Reason for MRI* (Ctrl = multi-select, Shift = batch-select) ",
         validators=[DataRequired("A reason must be specified.")],
         choices=choics_diagnoses,
     )
@@ -225,4 +226,7 @@ class NeonatalDataForm_Submit(NeonatalDataFormMixins):
 
 class NeonatalDataForm_Update(NeonatalDataFormMixins):
     update_entry = SubmitField("Update")
-    delete_entry = SubmitField("Delete")
+
+    confirm_delete = BooleanField("Confirm Delete?")
+    confirm_double_delete = BooleanField("Really, I double confirm Delete?")
+    delete_entry = SubmitField("!!!Delete!!!")
