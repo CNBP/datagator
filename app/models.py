@@ -70,6 +70,17 @@ class User(UserMixin, db.Model):
         lazy="dynamic",
     )
 
+    def created_entries(self):
+        """
+        This method returns all the posts of this user currently follows.
+        :return:
+        """
+        # Get followed posts.
+        entries = Entry.query.filter_by(user_id=self.id)
+
+        # Return all the entries by this user in descending temporal order
+        return entries.order_by(Entry.timestamp.desc())
+
     def followed_posts(self):
         """
         This method returns all the posts of this user currently follows.

@@ -1,0 +1,49 @@
+<!--Subtemplate for posts. -->
+<table class="table table-hover">
+    <tr>
+        <!--Author image. -->
+        <td width="150px">
+            Posted:
+            <br>
+            MRN:
+            <br>
+            CNBPID:
+            <br>
+            Birth Weight:
+            <br>
+            Birth Date:
+            <br>
+            Birth Time:
+            <br>
+            MRI Date:
+            <br>
+            MRI Reason:
+            <br>
+            MRI Age:
+            <br>
+        </td>
+
+        <!--Author images and post body-->
+        <td>
+            {{ moment(entry.timestamp).fromNow() }}:
+            <br>
+            {{ entry.MRN }}
+            <br>
+            {{ entry.CNBPID }}
+            <br>
+            {{ entry.birth_weight }}
+            <br>
+            {{ entry.birth_date }}
+            <br>
+            {{ entry.birth_time }}
+            <br>
+            {{ entry.mri_date }}
+            <br>
+            {{ entry.mri_reason }}
+            <br>
+            {{ entry.mri_age }}
+            <br>
+        </td>
+    </tr>
+</table>
+

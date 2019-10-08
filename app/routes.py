@@ -71,16 +71,15 @@ def index():
     # Get the page argumetn from the URL entered. Default to 1?
     page = request.args.get("page", 1, type=int)
 
-    # Use the paginate function from SQLAlchemy to get the posts.
-    posts = current_user.followed_posts().paginate(
+    # Use the paginate function from SQLAlchemy to get the entries.
+    entries = current_user.created_entries().paginate(
         page, app.config["POSTS_PER_PAGE"], False
     )
-
     # Next URL if they exist.
-    next_url = url_for("index", page=posts.next_num) if posts.has_next else None
+    next_url = url_for("index", page=entries.next_num) if entries.has_next else None
 
     # Previous URL if they exist
-    prev_url = url_for("index", page=posts.prev_num) if posts.has_prev else None
+    prev_url = url_for("index", page=entries.prev_num) if entries.has_prev else None
 
     # Return rendered template with the variables set.
     # Post > Redirect > Get pattern.
@@ -88,7 +87,7 @@ def index():
         "index.html",
         title="Home, Sweet Home!",
         form=form,
-        posts=posts.items,  # must use ITEMS if using pagination
+        entries=entries.items,  # must use ITEMS if using pagination
         next_url=next_url,
         prev_url=prev_url,
     )

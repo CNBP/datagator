@@ -12,8 +12,8 @@
     {% endif %}
 
     <!--Loop through all posts and include EACH using the _post subtemplate-->
-    {% for post in posts %}
-        {% include '_post.html' %}
+    {% for entry in entries %}
+        {% include '_entry.html' %}
     {% endfor %}
 
     <!--Pagination Handle, recall it is from NEWEST to OLDEST-->
@@ -21,12 +21,12 @@
         <ul class="pager">
             <li class="previous{% if not prev_url %} disabled{% endif %}">
                 <a href="{{ prev_url or '#' }}">
-                    <span aria-hidden="true">&larr;</span>Never posts
+                    <span aria-hidden="true">&larr;</span>Newer Entries
                 </a>
             </li>
             <li class="next{% if not next_url %} disabled{% endif %}">
                 <a href="{{ next_url or '#' }}">
-                    Older posts <span aria-hidden="true">&rarr;</span>
+                    Older Entries <span aria-hidden="true">&rarr;</span>
                 </a>
             </li>
         </ul>

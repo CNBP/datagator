@@ -97,7 +97,7 @@ class RequestEntryForm(FlaskForm):
             )
 
         # Check the current user name ID, validate it against the creation ID.
-        user_current = User.query.filter_by(username=self.username).first_or_500()
+        user_current = User.query.filter_by(username=self.username).first_or_404()
         # Check if they are the same
         if entries_desired.first().user_id != user_current.id:
             raise ValidationError(
