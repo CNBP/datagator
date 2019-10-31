@@ -1,4 +1,5 @@
-from app import db, login, app
+from app import db, login
+from flask import current_app
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -163,7 +164,7 @@ class User(UserMixin, db.Model):
         """
         return jwt.encode(
             {"reset_password": self.id, "exp": time() + expires_in},
-            app.config["SECRET_KEY"],
+            current_app.config["SECRET_KEY"],
             algorithm="HS256",
         ).decode("utf-8")
 
@@ -175,7 +176,7 @@ class User(UserMixin, db.Model):
         :return:
         """
         try:
-            id = jwt.decode(token, app.config["SECRET_KEY"], algorithms=["HS256"])[
+            id = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])[
                 "reset_password"
             ]  # get the value from that dictionary.
         except:

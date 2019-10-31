@@ -1,10 +1,10 @@
 from app import (
-    app,
+    create_app,
     db,
 )  #  a Python script at the top-level that defines the Flask application
 
 # instance
-
+app = create_app()
 from app.models import User, Post
 
 
