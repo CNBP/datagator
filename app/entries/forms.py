@@ -1,5 +1,5 @@
 from datetime import date, datetime, timedelta
-
+import sys
 from flask_wtf import FlaskForm
 from wtforms import (
     IntegerField,
@@ -70,7 +70,6 @@ class RequestEntryForm(FlaskForm):
     """
 
     id = IntegerField("Entry ID:", validators=[DataRequired()])
-
     submit = SubmitField("Load Entry")
 
     def __init__(self, current_username, *args, **kwargs):
@@ -96,8 +95,13 @@ class RequestEntryForm(FlaskForm):
                 "No loadable records were found. Maybe it did not exist OR you do not have permission to view it?"
             )
 
+        #print(self.username., file=sys.stdout)
+
         # Check the current user name ID, validate it against the creation ID.
         user_current = User.query.filter_by(username=self.username).first_or_404()
+        print(user_current, file=sys.stdout)
+        print(entries_desired.first(), file=sys.stdout)
+
         # Check if they are the same
         if entries_desired.first().user_id != user_current.id:
             raise ValidationError(
@@ -124,7 +128,7 @@ class NeonatalDataFormMixins(FlaskForm):
         "Birth Date* (YYYY-MM-DD)",
         validators=[DataRequired("Birth date is mandatory.")],
         format="%Y-%m-%d",
-        default=date.today(),
+        #default=date.today(),
     )
 
     birth_time = TimeField("Birth Time(HH:MM) in 24h format.")
@@ -137,18 +141,18 @@ class NeonatalDataFormMixins(FlaskForm):
     )
 
     mri_reason = SelectMultipleField(
-        "Reason for MRI* \n (Ctrl = multi-select, Shift = batch-select) ",
+        "Reason for MRI* \r\n (Ctrl = multi-select, Shift = batch-select) ",
         validators=[DataRequired("A reason must be specified.")],
         choices=choics_diagnoses,
     )
 
     mri_diagoses = SelectMultipleField(
-        "Final confirmed Diagnosis \n (Ctrl = multi-select, Shift = batch-select) ",
+        "Final confirmed Diagnosis \r\n (Ctrl = multi-select, Shift = batch-select) ",
         choices=choics_diagnoses,
     )
 
     dicharge_diagoses = SelectMultipleField(
-        "Hospital discharge diagnosis \n (Ctrl = multi-select, Shift = batch-select) ",
+        "Hospital discharge diagnosis \r\n (Ctrl = multi-select, Shift = batch-select) ",
         choices=choics_diagnoses,
     )
 
@@ -175,7 +179,7 @@ class NeonatalDataFormMixins(FlaskForm):
         :param birth_weight:
         :return:
         """
-        if birth_weight.data > 30:
+        if birth_weight.data > 2500:
             raise ValidationError("Birth weight too high (>30LB?!)")
         elif birth_weight.data < 0:
             raise ValidationError("Birth weight cannot be negative")
@@ -215,7 +219,7 @@ class NeonatalDataFormMixins(FlaskForm):
             hours=75
             * 52
             * 7
-            * 24  # 75 years, 52 weeks each, 7 days per week 24 hours per day.
+            * 24  # 75 years, 52 weeks each, 7 da12ys per week 24 hours per day.
         )
 
         if birthday >= datetime.now().date():

@@ -108,7 +108,7 @@ Python/.idea/
 .idea/
 
 # Data folders
-data_*
+data_archives
 development.py
 production.py
 *.driveupload

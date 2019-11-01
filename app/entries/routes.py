@@ -7,6 +7,7 @@ from flask import (
 )
 from flask_login import (  # flask_login module is a module to help manage module
     login_required,  # used to @login_required decorator to indicate a route MUST be logged in before showing.
+    current_user,
 )
 
 from app.entries.forms import (
@@ -17,8 +18,8 @@ from app.entries.forms import (
 
 from app import db
 
-from app.models import Entry  # import data base model for User and Post construct.
-from app.main import bp
+from app.models import Entry, User  # import data base model for User and Post construct.
+from app.entries import bp
 
 
 """
@@ -43,9 +44,14 @@ def data_entry():
     """
     # Instantiate the form
     form = NeonatalDataForm_Submit()
-    form.submit.render_kw = {"enabled": ""}
+    form.submit_entry.render_kw = {"enabled": ""}
     # If past validation, during submission,
     if form.validate_on_submit():
+
+        # Retrieve from database the row that contain the user name.
+        user_current = User.query.filter_by(
+            username=current_user.username
+        ).first_or_404()
 
         # Create the ENTRY model data
         entry = Entry(
@@ -56,16 +62,19 @@ def data_entry():
             birth_time=form.birth_time.data,
             mri_date=form.mri_date.data,
             mri_reason=str(form.mri_reason.data),
+            mri_dx=str(form.mri_diagoses.data),
+            dicharge_diagoses=str(form.dicharge_diagoses.data),
             mri_age=form.mri_age.data,
+            user_id=user_current.id
         )
         db.session.add(entry)
         db.session.commit()
 
         # Notify the issue.
         flash("Your data entry has been successfully written to the database.")
-        return redirect(url_for("main.index"))
+        return redirect(url_for("entries.index"))
 
-    return render_template("data_entry.html", title="Add a Data Entry", form=form)
+    return render_template("entries/data_entry.html", title="Add a Data Entry", form=form)
 
 
 @login_required
@@ -75,7 +84,7 @@ def data_request():
     The place to place a request to view data ENTRY form. 
     :return:
     """
-    form = RequestEntryForm()
+    form = RequestEntryForm(current_user.username)
     if form.validate_on_submit():
         id_form = int(form.id.data)
         logger.info(id_form)
