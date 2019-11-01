@@ -113,9 +113,11 @@ class NeonatalDataFormMixins(FlaskForm):
     MRN = IntegerField(
         "MRN*", validators=[DataRequired("Medical Record number is mandatory!")]
     )
+
     CNBPID = StringField("CNBPID")
+
     birth_weight = FloatField(
-        "Birth Weight* (lb)", validators=[DataRequired("Birth weight is mandatory.")]
+        "Birth Weight* (gram)", validators=[DataRequired("Birth weight is mandatory.")]
     )
 
     birth_date = DateField(
@@ -137,6 +139,16 @@ class NeonatalDataFormMixins(FlaskForm):
     mri_reason = SelectMultipleField(
         "Reason for MRI* \n (Ctrl = multi-select, Shift = batch-select) ",
         validators=[DataRequired("A reason must be specified.")],
+        choices=choics_diagnoses,
+    )
+
+    mri_diagoses = SelectMultipleField(
+        "Final confirmed Diagnosis \n (Ctrl = multi-select, Shift = batch-select) ",
+        choices=choics_diagnoses,
+    )
+
+    dicharge_diagoses = SelectMultipleField(
+        "Hospital discharge diagnosis \n (Ctrl = multi-select, Shift = batch-select) ",
         choices=choics_diagnoses,
     )
 

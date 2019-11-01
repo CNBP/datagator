@@ -27,12 +27,13 @@ mail = Mail(app)
 # The page to direct people to login if they are required.
 login = LoginManager(app)  # Instnatiate the LoginManager for this current app.
 login.login_view = "auth.login"
-login.login_message = 'Please log in to access this page.'
+login.login_message = "Please log in to access this page."
 
 bootstrap = Bootstrap(app)
 
 moment = Moment(app)
 babel = Babel(app)
+
 
 def create_app(config_class=Config):
     app = Flask(__name__)
@@ -50,9 +51,10 @@ def create_app(config_class=Config):
     from app.auth import bp as auth_bp
     from app.entries import bp as entries_bp
     from app.main import bp as main_bp
+
     # Register blueprint
     app.register_blueprint(erros_bp)
-    app.register_blueprint(auth_bp, url_prefix='/auth')  # extra name spacing.
+    app.register_blueprint(auth_bp, url_prefix="/auth")  # extra name spacing.
     app.register_blueprint(entries_bp)  # extra name spacing.
     app.register_blueprint(main_bp)
 
@@ -103,6 +105,7 @@ def create_app(config_class=Config):
         logger.debug("App is currently in debug mode and no email has been sent")
 
     return app
+
 
 """
 @babel.localeselector

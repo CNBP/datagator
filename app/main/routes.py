@@ -5,7 +5,7 @@ from flask import (
     redirect,  # redirect to another page.
     url_for,  # used to interpret endpoints.
     request,
-    current_app, # to get current app related issue.
+    current_app,  # to get current app related issue.
 )
 from flask_login import (  # flask_login module is a module to help manage module
     current_user,  # get the active logged in user.
@@ -13,15 +13,9 @@ from flask_login import (  # flask_login module is a module to help manage modul
 )
 
 from app import db
-from app.main.forms import (
-    EditProfileForm,
-    PostForm
-)
+from app.main.forms import EditProfileForm, PostForm
 
-from app.models import (
-    User,
-    Post,
-)  # import data base model for User and Post construct.
+from app.models import User, Post  # import data base model for User and Post construct.
 from app.main import bp
 
 
@@ -118,7 +112,6 @@ def user(username):
     )
 
 
-
 @bp.before_request
 def before_request():
     """
@@ -133,6 +126,7 @@ def before_request():
 
         # Commit the information to the database.
         db.session.commit()
+
 
 @bp.route("/edit_profile", methods=["GET", "POST"])
 @login_required
@@ -160,7 +154,6 @@ def edit_profile():
         form.about_me.data = current_user.about_me
 
     return render_template("edit_profile.html", title="Edit Profile", form=form)
-
 
 
 @bp.route("/follow/<username>")

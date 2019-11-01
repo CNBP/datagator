@@ -20,6 +20,7 @@ from app.models import User
 This contains classes which represent a great variety of forms which collects or allow edit of a great variety of information.  
 """
 
+
 class EditProfileForm(FlaskForm):
     """
     Specific form which allow people to submit the profile specific information. 

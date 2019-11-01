@@ -176,7 +176,9 @@ class User(UserMixin, db.Model):
         :return:
         """
         try:
-            id = jwt.decode(token, current_app.config["SECRET_KEY"], algorithms=["HS256"])[
+            id = jwt.decode(
+                token, current_app.config["SECRET_KEY"], algorithms=["HS256"]
+            )[
                 "reset_password"
             ]  # get the value from that dictionary.
         except:

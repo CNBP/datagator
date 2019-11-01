@@ -17,9 +17,7 @@ from app.entries.forms import (
 
 from app import db
 
-from app.models import (
-    Entry,
-)  # import data base model for User and Post construct.
+from app.models import Entry  # import data base model for User and Post construct.
 from app.main import bp
 
 
@@ -34,7 +32,6 @@ import logging
 
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
-
 
 
 @login_required
@@ -85,7 +82,9 @@ def data_request():
         logger.info("Reached here!")
         flash(f"Requesting entry data from ID={str(id_form)}.")
         return redirect(url_for("entries.data_view", id_entry=id_form))
-    return render_template("entries/data_view.html", title="Load a Data Entry", form=form)
+    return render_template(
+        "entries/data_view.html", title="Load a Data Entry", form=form
+    )
 
 
 @login_required
@@ -135,5 +134,3 @@ def data_view(id_entry):
 
     # Post > Redirect > Get pattern.
     return render_template("entries/data_view.html", form=form)
-
-

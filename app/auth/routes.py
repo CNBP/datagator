@@ -23,9 +23,7 @@ from app.auth.forms import (
 from app import db
 from app.auth import bp
 
-from app.models import (
-    User,
-)  # import data base model for User and Post construct.
+from app.models import User  # import data base model for User and Post construct.
 
 from datetime import datetime
 from app.auth.email import send_password_reset_email
@@ -44,7 +42,6 @@ logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 
 
-
 @bp.route("/logout")
 def logout():
     """
@@ -53,7 +50,6 @@ def logout():
     """
     logout_user()  # from the flask_login module
     return redirect(url_for("main.index"))
-
 
 
 @bp.route("/register", methods=["GET", "POST"])

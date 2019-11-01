@@ -4,6 +4,7 @@ from app import create_app, db
 from app.models import User, Post
 from config import Config
 
+
 class UserModelCase(unittest.TestCase):
     def setUp(self):
         """
@@ -125,9 +126,10 @@ class UserModelCase(unittest.TestCase):
         self.assertEqual(f3, [p3, p4])
         self.assertEqual(f4, [p4])
 
+
 class TestConfig(Config):
     TESTING = True
-    SQLALCHEMY_DATABASE_URI = 'sqlite://'
+    SQLALCHEMY_DATABASE_URI = "sqlite://"
 
 
 if __name__ == "__main__":

@@ -14,8 +14,8 @@ COPY migrations migrations
 COPY index.py config.py boot.sh ./
 RUN chmod +x boot.sh
 
-ENV FLASK_APP microblog.py
-RUN chown -R microblog:microblog ./
+ENV FLASK_APP index.py
+RUN chown -R datagator:datagator ./
 USER datagator
 
 EXPOSE 5000
