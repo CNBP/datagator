@@ -1,0 +1,27 @@
+table{@}LocalMRIQuestionnaire
+title{@}LocalMRIQuestionnaire
+date{@}Date_taken{@}Date of Administration{@}2006{@}2012
+static{@}Candidate_Age{@}Candidate Age (Months)
+static{@}Window_Difference{@}Window Difference (+/- Days)
+select{@}Examiner{@}Examiner{@}NULL=>''
+header{@}{@}Supplementary Clinical Data Collection
+numeric{@}MRN{@}What is the Medical Record Number? {@}0{@}9999999
+select{@}MRN_status{@}{@}NULL=>''{-}'not_answered'=>'Not Answered'
+text{@}CNBPID{@}What is the CNBPID?
+select{@}CNBPID_status{@}{@}NULL=>''{-}'not_answered'=>'Not Answered'
+numeric{@}BirthWeight{@}What is the Birth Weight in grams?{@}230{@}2500
+select{@}BirthWeight_status{@}{@}NULL=>''{-}'not_answered'=>'Not Answered'
+date{@}birthdate_date{@}When was the patient born?{@}1986{@}9999{@}
+select{@}birthdate_date_status{@}{@}NULL=>''{-}'not_answered'=>'Not Answered'
+text{@}BirthTime{@}What was the precise time of birth of the patient?
+select{@}BirthTime_status{@}{@}NULL=>''{-}'not_answered'=>'Not Answered'
+date{@}mridate_date{@}When was MRI conducted? {@}2000{@}9999{@}
+select{@}mridate_date_status{@}{@}NULL=>''{-}'not_answered'=>'Not Answered'
+selectmultiple{@}MRIReason{@}Why was MRI conducted?{@}NULL=>''{-}'d1'=>'D1'{-}'d2'=>'D2'{-}'d3'=>'D3'{-}'not_answered'=>'Not Answered'
+selectmultiple{@}MRIDx{@}What was the diagnoses of MRI? {@}NULL=>''{-}'d1'=>'D1'{-}'d2'=>'D2'{-}'d3'=>'D3'{-}'not_answered'=>'Not Answered'
+text{@}LocalEntryTimeStamp{@}When was the data entered locally?
+select{@}LocalEntryTimeStamp_status{@}{@}NULL=>''{-}'not_answered'=>'Not Answered'
+numeric{@}LocalUserID{@}What was the ID of the user entering the data? {@}0{@}9999999999999
+select{@}LocalUserID_status{@}{@}NULL=>''{-}'not_answered'=>'Not Answered'
+numeric{@}MRIAge{@}How was was the patient when MRI was done (in approximate weeks)?{@}0{@}999999999
+select{@}MRIAge_status{@}{@}NULL=>''{-}'not_answered'=>'Not Answered'
