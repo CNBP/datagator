@@ -9,4 +9,5 @@ flask-wtf
 flask-bootstrap
 flask-moment
 flask-babel
+sqlalchemy-utils
 #flask-debugtoolbar

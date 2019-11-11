@@ -6,6 +6,10 @@ from flask_login import UserMixin
 from hashlib import md5
 import jwt
 from time import time
+from sqlalchemy_utils import EncryptedType
+from cryptography.fernet import Fernet
+import os
+from dotenv import load_dotenv
 
 
 @login.user_loader
@@ -43,7 +47,7 @@ class Post(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey("user.id"))
 
     def __repr__(self):
-        return "<Post {}>".format(self.body)
+        return f"<Post {self.body}>"
 
 
 class User(UserMixin, db.Model):
@@ -100,7 +104,7 @@ class User(UserMixin, db.Model):
 
     # Print object from this class
     def __repr__(self):
-        return "<usr {}>".format(self.username)
+        return f"<usr {self.username}>"
 
     # Hash generation.
     def set_password(self, password):
@@ -209,4 +213,45 @@ class Entry(db.Model):
     )  # used to associate who entered this entry.
 
     def __repr__(self):
-        return "<Entry {}>".format(self.user_id)
+        return f"<Entry {self.id}>"
+
+
+class DICOMTransitConfig(db.Model):
+    """
+    This is used to model the configuration entry from the user regarding DICOMTransit Operation.
+    """
+
+    # Get the encryption key from the env.
+    load_dotenv()
+    key = os.getenv("encryption_key")
+
+    # Inspired from: https://stackoverflow.com/questions/49560609/sqlalchemy-encrypt-a-column-without-automatically-decrypting-upon-retrieval
+    id = db.Column(db.Integer, primary_key=True)
+    LORISurl = db.Column(db.String)
+    LORISusername = db.Column(EncryptedType(db.String, key))
+    LORISpassword = db.Column(EncryptedType(db.String, key))
+
+    timepoint_prefix = db.Column(db.String)
+    institutionID = db.Column(db.String)
+    institutionName = db.Column(db.String)
+    projectID_dic = db.Column(db.String)
+    LocalDatabasePath = db.Column(db.String)
+    LogPath = db.Column(db.String)
+    ZipPath = db.Column(db.String)
+    DevOrthancIP = db.Column(db.String)
+
+    DevOrthancUser = db.Column(EncryptedType(db.String, key))
+    DevOrthancPassword = db.Column(EncryptedType(db.String, key))
+
+    ProdOrthancIP = db.Column(db.String)
+    ProdOrthancUser = db.Column(EncryptedType(db.String, key))
+    ProdOrthancPassword = db.Column(EncryptedType(db.String, key))
+
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id")
+    )  # used to associate who entered this entry.
+
+    def __repr__(self):
+        return f"<DICOMTransitConfig {self.id} by {self.user_id} on {self.timestamp}>"
