@@ -95,7 +95,7 @@ class RequestEntryForm(FlaskForm):
                 "No loadable records were found. Maybe it did not exist OR you do not have permission to view it?"
             )
 
-        #print(self.username., file=sys.stdout)
+        # print(self.username., file=sys.stdout)
 
         # Check the current user name ID, validate it against the creation ID.
         user_current = User.query.filter_by(username=self.username).first_or_404()
@@ -128,7 +128,7 @@ class NeonatalDataFormMixins(FlaskForm):
         "Birth Date* (YYYY-MM-DD)",
         validators=[DataRequired("Birth date is mandatory.")],
         format="%Y-%m-%d",
-        #default=date.today(),
+        # default=date.today(),
     )
 
     birth_time = TimeField("Birth Time(HH:MM) in 24h format.")

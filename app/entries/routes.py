@@ -18,7 +18,10 @@ from app.entries.forms import (
 
 from app import db
 
-from app.models import Entry, User  # import data base model for User and Post construct.
+from app.models import (
+    Entry,
+    User,
+)  # import data base model for User and Post construct.
 from app.entries import bp
 
 
@@ -65,7 +68,7 @@ def data_entry():
             mri_dx=str(form.mri_diagoses.data),
             dicharge_diagoses=str(form.dicharge_diagoses.data),
             mri_age=form.mri_age.data,
-            user_id=user_current.id
+            user_id=user_current.id,
         )
         db.session.add(entry)
         db.session.commit()
@@ -74,7 +77,9 @@ def data_entry():
         flash("Your data entry has been successfully written to the database.")
         return redirect(url_for("entries.index"))
 
-    return render_template("entries/data_entry.html", title="Add a Data Entry", form=form)
+    return render_template(
+        "entries/data_entry.html", title="Add a Data Entry", form=form
+    )
 
 
 @login_required
