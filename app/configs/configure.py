@@ -1,17 +1,4 @@
-from datetime import datetime
-from flask import (
-    render_template,  # flask function to render a HTML template with elements replaced.
-    flash,  # show a message overlay.
-    redirect,  # redirect to another page.
-    request,
-    url_for,  # used to interpret endpoints.
-    g,
-)
-from flask_login import (  # flask_login module is a module to help manage module
-    login_required,  # used to @login_required decorator to indicate a route MUST be logged in before showing.
-    current_user,
-)
-
+from flask import Blueprint, flash, g, redirect, render_template, request, url_for
 from werkzeug.exceptions import abort
 import os, sys
 
@@ -21,38 +8,33 @@ path_file = os.path.dirname(os.path.realpath(__file__))
 path_module = Path(path_file)
 sys.path.append(f"{path_module}")
 
+from configurator.dtconfigure.auth import login_required
 from configurator.dtconfigure.db import get_db
-
-# from app.config.forms import NeonatalDataForm_Submit
-
-from app import db
-
-from app.models import (
-    DICOMTransitConfig,
-)  # import data base model for User and Post construct.
-from app.configs import bp
+import os, sys
 
 
 """
-This file is responsible for ROUTING the VIEW functions. What happens when you look at a page etc?
-
-Any view needs to be defined here. 
-
+sys.path.append(
+    os.path.dirname(
+        os.path.dirname(
+            os.path.dirname(
+                os.path.abspath(__file__)
+            )
+        )
+    )
+)
 """
-
-import logging
-
-logger = logging.getLogger()
-logging.basicConfig(level=logging.INFO)
 
 from DICOMTransit.LocalDB.schema import CNBP_blueprint
 
 envvars = CNBP_blueprint.dotenv_variables
 
+bp = Blueprint("configure", __name__)
 
+
+@bp.route("/")
 @login_required
-@bp.route("/settings/", methods=["GET", "POST"])
-def settings():
+def index():
     """
     Show all the configurations, most recent order first
     :return:
@@ -74,20 +56,19 @@ def settings():
         "ProdOrthancPassword",
     ]
     return render_template(
-        "config/index.html",
-        title="Current Configurations",
-        # form=form
+        "configure/index.html",
         configurations=configurations,
         password_keys=password_keys,
     )
 
 
-@bp.route("/create_config", methods=("GET", "POST"))
+@bp.route("/create", methods=("GET", "POST"))
 @login_required
-def create_config():
+def create():
     """
     The Create View
     """
+
     if request.method == "POST":
         error = None
 
@@ -133,7 +114,7 @@ def create_config():
     # Ue list comprehension to create dict of configurations
     # The dict keys are the samne as the dict values
     configurations = {v: v for v in envvars}
-    return render_template("config/create.html", configurations=configurations)
+    return render_template("configure/create.html", configurations=configurations)
 
 
 @bp.route("/<int:id>/update", methods=("GET", "POST"))
@@ -243,7 +224,7 @@ def check_form_inputs(form):
 
 def get_configuration(id, check_user=True):
     """
-    Get configuration and check if user matches.
+    Get configuration and check if user matches. 
     :param id:
     :param check_user:
     :return:
