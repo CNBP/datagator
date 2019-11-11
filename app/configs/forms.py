@@ -15,148 +15,56 @@ from wtforms import (
 from wtforms.validators import DataRequired
 from app.models import Entry, User
 
-choics_diagnoses = [
-    ("d0", "No Diagnoses, Healthy."),
-    ("d1", "ABO incompatibility"),
-    ("d2", "Anemia"),
-    ("d3", "Apnea"),
-    ("d4", "Asphxia"),
-    ("d5", "Aspiration"),
-    ("d6", "Bradycardia"),
-    ("d7", "Breathing problesm"),
-    ("d8", "Bronchopulmonary dysplastia"),
-    ("d9", "Cerebral palsy"),
-    ("d10", "Coarctation of the aorta"),
-    ("d11", "Cyanosis"),
-    ("d12", "Desaturation"),
-    ("d13", "Feeding difficutlies"),
-    ("d14", "Gastrostomy tube"),
-    ("d15", "Heart failure"),
-    ("d16", "Heart murmur"),
-    ("d17", "Heart valve abnormalities"),
-    ("d18", "Hernia/Hydrocele"),
-    ("d19", "Hypoglycemia"),
-    ("d20", "Hypotension"),
-    ("d21", "Hypothermia"),
-    ("d22", "Hypertension"),
-    ("d23", "Intrauterine growth retardation "),
-    ("d24", "Intraventricular hemorrhage"),
-    ("d25", "Jaundice"),
-    ("d26", "Laryngomalacia"),
-    ("d27", "Necrotizing enterocolitis"),
-    ("d28", "Patent ductus arteriosus"),
-    ("d29", "Periodic breathing"),
-    ("d30", "Periventricular leukomalacia"),
-    ("d31", "Persistent pulmonary hypertehsion of the newborn"),
-    ("d32", "Pneumonia"),
-    ("d33", "Pneumothorax"),
-    ("d34", "Polycythemia"),
-    ("d35", "Reflux"),
-    ("d36", "Repiratory distress syndrome"),
-    ("d37", "Retinopathy of prematurity"),
-    ("d38", "Retraction"),
-    ("d39", "Rh incompatibility"),
-    ("d40", "Seizures"),
-    ("d41", "Sepsis"),
-    ("d42", "Septal defect"),
-    ("d43", "Tetralogy of Fallot"),
-    ("d44", "Transposition of the great arteries"),
-]
 
-
-class RequestEntryForm(FlaskForm):
-    """
-    This is used to request a particular entry.
-    """
-
-    id = IntegerField("Entry ID:", validators=[DataRequired()])
-    submit = SubmitField("Load Entry")
-
-    def __init__(self, current_username, *args, **kwargs):
-        # At the time of initialization
-        super(RequestEntryForm, self).__init__(*args, **kwargs)
-
-        # Store the input into class variable.
-        self.username = current_username
-
-    def validate_id(self, id):
-        """
-        Validation function to ensure such entries exist.
-        :param username:
-        :return:
-        """
-        entries_desired = Entry.query.filter_by(id=id.data)
-
-        # check the database to see if such user name already exist
-        entry = entries_desired.scalar() is not None
-        # Entry does not exist!
-        if not entry:
-            raise ValidationError(
-                "No loadable records were found. Maybe it did not exist OR you do not have permission to view it?"
-            )
-
-        # print(self.username., file=sys.stdout)
-
-        # Check the current user name ID, validate it against the creation ID.
-        user_current = User.query.filter_by(username=self.username).first_or_404()
-        print(user_current, file=sys.stdout)
-        print(entries_desired.first(), file=sys.stdout)
-
-        # Check if they are the same
-        if entries_desired.first().user_id != user_current.id:
-            raise ValidationError(
-                "No loadable records were found! Maybe it did not exist OR you do not have permission to view it."
-            )
-
-
-class NeonatalDataFormMixins(FlaskForm):
+class DTConfigForm(FlaskForm):
     """
     This is the main form where bulk of the data for the clinical inforamtion are entered
     """
 
-    MRN = IntegerField(
-        "MRN*", validators=[DataRequired("Medical Record number is mandatory!")]
+    LORISurl = StringField("LORIS URL")
+    LORISusername = StringField(
+        "LORIS Username for your location",
+        validators=[DataRequired("Birth weight is mandatory.")],
     )
-
-    CNBPID = StringField("CNBPID")
-
-    birth_weight = FloatField(
-        "Birth Weight* (gram)", validators=[DataRequired("Birth weight is mandatory.")]
+    LORISpassword = StringField(
+        "LORIS Password of the Username",
+        validators=[DataRequired("Birth weight is mandatory.")],
     )
-
-    birth_date = DateField(
-        "Birth Date* (YYYY-MM-DD)",
-        validators=[DataRequired("Birth date is mandatory.")],
-        format="%Y-%m-%d",
-        # default=date.today(),
+    timepoint_prefix = StringField(
+        "Prefix for the Timepoint",
+        validators=[DataRequired("Birth weight is mandatory.")],
     )
-
-    birth_time = TimeField("Birth Time(HH:MM) in 24h format.")
-
-    mri_date = DateField(
-        "MRI Date* (YYYY-MM-DD)",
-        validators=[DataRequired("MRI scan date is mandatory.")],
-        format="%Y-%m-%d",
-        default=date.today(),
+    institutionID = StringField(
+        "ID of the institution", validators=[DataRequired("Birth weight is mandatory.")]
     )
-
-    mri_reason = SelectMultipleField(
-        "Reason for MRI* \r\n (Ctrl = multi-select, Shift = batch-select) ",
-        validators=[DataRequired("A reason must be specified.")],
-        choices=choics_diagnoses,
+    institutionName = StringField("Name of the institution")
+    projectID_dic = StringField("Dictionary of list of PrrojectIDs")
+    LocalDatabasePath = StringField(
+        "Path to the Local Database",
+        validators=[DataRequired("Birth weight is mandatory.")],
     )
-
-    mri_diagoses = SelectMultipleField(
-        "Final confirmed Diagnosis \r\n (Ctrl = multi-select, Shift = batch-select) ",
-        choices=choics_diagnoses,
+    LogPath = StringField(
+        "Path to Log", validators=[DataRequired("Birth weight is mandatory.")]
     )
-
-    dicharge_diagoses = SelectMultipleField(
-        "Hospital discharge diagnosis \r\n (Ctrl = multi-select, Shift = batch-select) ",
-        choices=choics_diagnoses,
+    ZipPath = StringField(
+        "Path to Zip files temporary storage. ",
+        validators=[DataRequired("Birth weight is mandatory.")],
     )
-
-    mri_age = FloatField("Gestation Age (weeks)")
+    DevOrthancIP = StringField("IP address of the Development Orthanc")
+    DevOrthancUser = StringField("User name of the Development Orthanc")
+    DevOrthancPassword = StringField("Password of of the Development Orthanc")
+    ProdOrthancIP = StringField(
+        "IP of of the Production Orthanc",
+        validators=[DataRequired("Birth weight is mandatory.")],
+    )
+    ProdOrthancUser = StringField(
+        "User name of the Lpregjycrb Orthanc",
+        validators=[DataRequired("Birth weight is mandatory.")],
+    )
+    ProdOrthancPassword = StringField(
+        "Password of the Production Orthanc",
+        validators=[DataRequired("Birth weight is mandatory.")],
+    )
 
     """
     Make sure to update the validator fields below should you change or rename anything here! 

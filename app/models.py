@@ -226,7 +226,7 @@ class DICOMTransitConfig(db.Model):
     key = os.getenv("encryption_key")
 
     # Inspired from: https://stackoverflow.com/questions/49560609/sqlalchemy-encrypt-a-column-without-automatically-decrypting-upon-retrieval
-    id = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, primary_key=True)  # hidden
     LORISurl = db.Column(db.String)
     LORISusername = db.Column(EncryptedType(db.String, key))
     LORISpassword = db.Column(EncryptedType(db.String, key))
@@ -247,11 +247,11 @@ class DICOMTransitConfig(db.Model):
     ProdOrthancUser = db.Column(EncryptedType(db.String, key))
     ProdOrthancPassword = db.Column(EncryptedType(db.String, key))
 
-    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)  # hidden
 
     user_id = db.Column(
         db.Integer, db.ForeignKey("user.id")
-    )  # used to associate who entered this entry.
+    )  # used to associate who entered this entry. # hidden
 
     def __repr__(self):
         return f"<DICOMTransitConfig {self.id} by {self.user_id} on {self.timestamp}>"

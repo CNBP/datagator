@@ -36,6 +36,8 @@
                     {% else %}
                         <li><a href="{{ url_for('entries.data_entry') }}">Add Data Entry</a> </li>
                         <li><a href="{{ url_for('entries.data_request') }}">View Data Entry</a> </li>
+                        <li><a href="{{ url_for('configs.settings') }}">View DICOMTransit Settings</a> </li>
+                        <li><a href="{{ url_for('configs.create_config') }}">Update Add DICOMTranist Config</a> </li>
                     {% endif %}
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
