@@ -11,9 +11,24 @@ from wtforms import (
     SubmitField,
     ValidationError,
     BooleanField,
+    Field,
 )
-from wtforms.validators import DataRequired
+from wtforms.validators import (
+    DataRequired,  # Require data to be in that filed.
+    ValidationError,  # Raise Validation error if things go bad.
+    Email,  # Require data to be considered email.
+    EqualTo,  # Require the data to equal to another field.
+    Length,
+)
 from app.models import Entry, User
+from pathlib import Path
+
+
+def path_exist_check(form, field):
+    if not Path(field.data).exists():
+        raise ValidationError(
+            f"Path provided: {field.data} does not exist or does not have permission to access!"
+        )
 
 
 class DTConfigForm(FlaskForm):
@@ -24,46 +39,59 @@ class DTConfigForm(FlaskForm):
     LORISurl = StringField("LORIS URL")
     LORISusername = StringField(
         "LORIS Username for your location",
-        validators=[DataRequired("Birth weight is mandatory.")],
+        validators=[DataRequired("LORIS Username obtained from CNBP")],
     )
     LORISpassword = StringField(
         "LORIS Password of the Username",
-        validators=[DataRequired("Birth weight is mandatory.")],
+        validators=[
+            DataRequired("LORIS Password you set for your CNBP LORIS password.")
+        ],
     )
     timepoint_prefix = StringField(
         "Prefix for the Timepoint",
-        validators=[DataRequired("Birth weight is mandatory.")],
+        validators=[
+            DataRequired("Timepoint prefix used to distinguish the various."),
+            Length(min=1, max=1),
+        ],
     )
     institutionID = StringField(
-        "ID of the institution", validators=[DataRequired("Birth weight is mandatory.")]
+        "ID of the institution",
+        validators=[
+            DataRequired("Three Letter string represent the local institintion."),
+            Length(min=3, max=3),
+        ],
     )
-    institutionName = StringField("Name of the institution")
-    projectID_dic = StringField("Dictionary of list of PrrojectIDs")
+    institutionName = StringField("Full name of the institution")
+    projectID_dic = StringField("Dictionary of list of ProjectIDs")
     LocalDatabasePath = StringField(
         "Path to the Local Database",
-        validators=[DataRequired("Birth weight is mandatory.")],
+        validators=[DataRequired("Path to the local database."), path_exist_check],
     )
     LogPath = StringField(
-        "Path to Log", validators=[DataRequired("Birth weight is mandatory.")]
+        "Path to Log",
+        validators=[DataRequired("Path to the log folder."), path_exist_check],
     )
     ZipPath = StringField(
         "Path to Zip files temporary storage. ",
-        validators=[DataRequired("Birth weight is mandatory.")],
+        validators=[
+            DataRequired("Path to the zip folder where files are unzipped"),
+            path_exist_check,
+        ],
     )
     DevOrthancIP = StringField("IP address of the Development Orthanc")
     DevOrthancUser = StringField("User name of the Development Orthanc")
     DevOrthancPassword = StringField("Password of of the Development Orthanc")
     ProdOrthancIP = StringField(
         "IP of of the Production Orthanc",
-        validators=[DataRequired("Birth weight is mandatory.")],
+        validators=[DataRequired("Accessing the production Orthanc IP address")],
     )
     ProdOrthancUser = StringField(
         "User name of the Lpregjycrb Orthanc",
-        validators=[DataRequired("Birth weight is mandatory.")],
+        validators=[DataRequired("User name of the production Orthanc deployed.")],
     )
     ProdOrthancPassword = StringField(
         "Password of the Production Orthanc",
-        validators=[DataRequired("Birth weight is mandatory.")],
+        validators=[DataRequired("Password of the production orthanc deloyed.")],
     )
 
     """
@@ -71,98 +99,15 @@ class DTConfigForm(FlaskForm):
     Note that these while similar but are not the same thing as the database fileds. 
     """
 
-    def validate_MRN(self, MRN):
-        """
-        Validate the MRN field to ensure it is not too big or negative.
-        :param MRN:
-        """
-        if MRN.data > 9999999:
-            raise ValidationError("MRN number must be 7 digits")
-        elif MRN.data < 0:
-            raise ValidationError("MRN number cannot be negative")
+    def validate_path(self, path_input: Field):
 
-    def validate_birth_weight(self, birth_weight):
-        """
-        Validate birth weight to ensure it is not TOO high or negative.
-        :param birth_weight:
-        :return:
-        """
-        if birth_weight.data > 2500:
-            raise ValidationError("Birth weight too high (>30LB?!)")
-        elif birth_weight.data < 0:
-            raise ValidationError("Birth weight cannot be negative")
-
-    def validate_mri_age(self, mri_age):
-        """
-        Validate the MRI age to ensure it is not too old and not too young
-        :param mri_age:
-        :return:
-        """
-
-        if mri_age.data < 20:
-            raise ValidationError(
-                "Gestational age is less than 20 weeks old? Are you sure? "
-            )
-        elif mri_age.data > 5 * 52:
-            raise ValidationError(
-                "Gestational age is more than 5 YEARS old? Are you sure? "
-            )
-
-    def validate_birth_date(self, birth_date):
-        """
-        Validate the birth date to ensure that it is not in the future not too recent and not too far in the past.
-        :param birth_date:
-        :return:
-        """
-
-        # assum
-        birthday = birth_date.data
-
-        # Youngest preemie is at least 23 weeks old. You cannot be younger than that and expect to be scanned?
-        birth_date_latest_possible = datetime.now() - timedelta(
-            hours=23 * 7 * 24  # 23 weeks each, 7 days per week 24 hours per day.
-        )
-
-        birth_date_earliest_possible = datetime.now() - timedelta(
-            hours=75
-            * 52
-            * 7
-            * 24  # 75 years, 52 weeks each, 7 da12ys per week 24 hours per day.
-        )
-
-        if birthday >= datetime.now().date():
-            raise ValidationError("Birth is in the future? Are you sure? ")
-        elif birthday < birth_date_earliest_possible.date():
-            raise ValidationError(
-                "Based on Birthday, the age is more than 75 YEARS old? Are you sure? "
-            )
-        elif birthday > birth_date_latest_possible.date():
-            raise ValidationError(
-                "Based on Birthday, the age is younger than 23 weeks old? Are you sure? "
-            )
-
-    def validate_mri_date(self, birth_date):
-        """
-        Check the MRI date to ensure it is not too far
-        :param birth_date:
-        :param mri_date:
-        :return:
-        """
-        mri_date_iso = self.mri_date.data
-        age = mri_date_iso - birth_date.data
-        weeks = age.days / 7
-
-        if mri_date_iso > datetime.now().date():
-            raise ValidationError(
-                "You will scan this subject is in the future? Are you sure? "
-            )
-        elif weeks < -36:
-            raise ValidationError("MRI age is less than 20 weeks old? Are you sure? ")
-        elif weeks > 52 * 25:
-            raise ValidationError("MRI age is more than 25 YEARS old? Are you sure? ")
+        if Path(path_input.data).exists():
+            return True
+        else:
+            return False
 
 
-class NeonatalDataForm_Submit(NeonatalDataFormMixins):
+class NeonatalDataForm_Submit(DTConfigForm):
     """
     This is an extended class of the base form. This is for the submission purpsoe.
     """
@@ -170,7 +115,7 @@ class NeonatalDataForm_Submit(NeonatalDataFormMixins):
     submit_entry = SubmitField("Submit")
 
 
-class NeonatalDataForm_Update(NeonatalDataFormMixins):
+class NeonatalDataForm_Update(DTConfigForm):
     """
     This is an extended class of the base form. This is for the update and deletion purpsoe.
     """
