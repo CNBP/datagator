@@ -1,1 +1,1 @@
-web: flask db upgrade; gunicorn datagator:app
+web: flask db upgrade; gunicorn app
