@@ -10,4 +10,6 @@ flask-bootstrap
 flask-moment
 flask-babel
 sqlalchemy-utils
+gunicorn
 #flask-debugtoolbar
+psycopg2
