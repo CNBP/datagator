@@ -122,7 +122,7 @@ def create_app(config_class=Config):
         app.logger.addHandler(file_handler)
 
         app.logger.setLevel(logging.INFO)
-        app.logger.info("Microblog is starting up!")
+        app.logger.info("Datagator is starting up!")
     else:
         logger.debug("App is currently in debug mode and no email has been sent")
 
