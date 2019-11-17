@@ -14,3 +14,4 @@ gunicorn
 #flask-debugtoolbar
 psycopg2
 python-dotenv
+cryptography
