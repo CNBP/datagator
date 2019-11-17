@@ -1,5 +1,5 @@
 from __future__ import with_statement
-
+import sqlalchemy_utils
 import logging
 from logging.config import fileConfig
 

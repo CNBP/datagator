@@ -1,31 +1,34 @@
-from datetime import date, datetime, timedelta
-import sys
 from flask_wtf import FlaskForm
 from wtforms import (
-    IntegerField,
     StringField,
-    FloatField,
-    DateField,
-    TimeField,
-    SelectMultipleField,
+    PasswordField,  # used to hide LORIS and Orthanc password fields from view.
     SubmitField,
-    ValidationError,
     BooleanField,
     Field,
 )
+
 from wtforms.validators import (
     DataRequired,  # Require data to be in that filed.
     ValidationError,  # Raise Validation error if things go bad.
-    Email,  # Require data to be considered email.
-    EqualTo,  # Require the data to equal to another field.
     Length,
 )
-from app.models import Entry, User
 from pathlib import Path
 
 
 def path_exist_check(form, field):
-    if not Path(field.data).exists():
+    """
+    A generic verification function where the first
+    :param form:
+    :param field:
+    :return:
+    """
+    try:
+        path_exist = Path(field.data).exists()
+    except OSError:
+        raise ValidationError(
+            f"Path provided: {field.data} has incompatible format. Ensure the path actuall exist."
+        )
+    except:
         raise ValidationError(
             f"Path provided: {field.data} does not exist or does not have permission to access!"
         )
@@ -41,7 +44,7 @@ class DTConfigForm(FlaskForm):
         "LORIS Username for your location",
         validators=[DataRequired("LORIS Username obtained from CNBP")],
     )
-    LORISpassword = StringField(
+    LORISpassword = PasswordField(
         "LORIS Password of the Username",
         validators=[
             DataRequired("LORIS Password you set for your CNBP LORIS password.")
@@ -80,16 +83,16 @@ class DTConfigForm(FlaskForm):
     )
     DevOrthancIP = StringField("IP address of the Development Orthanc")
     DevOrthancUser = StringField("User name of the Development Orthanc")
-    DevOrthancPassword = StringField("Password of of the Development Orthanc")
+    DevOrthancPassword = PasswordField("Password of of the Development Orthanc")
     ProdOrthancIP = StringField(
         "IP of of the Production Orthanc",
         validators=[DataRequired("Accessing the production Orthanc IP address")],
     )
     ProdOrthancUser = StringField(
-        "User name of the Lpregjycrb Orthanc",
+        "User name of the Production Orthanc",
         validators=[DataRequired("User name of the production Orthanc deployed.")],
     )
-    ProdOrthancPassword = StringField(
+    ProdOrthancPassword = PasswordField(
         "Password of the Production Orthanc",
         validators=[DataRequired("Password of the production orthanc deloyed.")],
     )
@@ -107,7 +110,7 @@ class DTConfigForm(FlaskForm):
             return False
 
 
-class NeonatalDataForm_Submit(DTConfigForm):
+class DTConfigForm_Submit(DTConfigForm):
     """
     This is an extended class of the base form. This is for the submission purpsoe.
     """
@@ -115,7 +118,7 @@ class NeonatalDataForm_Submit(DTConfigForm):
     submit_entry = SubmitField("Submit")
 
 
-class NeonatalDataForm_Update(DTConfigForm):
+class DTConfigForm_Update(DTConfigForm):
     """
     This is an extended class of the base form. This is for the update and deletion purpsoe.
     """

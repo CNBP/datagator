@@ -1,16 +1,12 @@
 from flask_wtf import FlaskForm
 from wtforms import (
     StringField,  # regular string.
-    PasswordField,  # password, hidden from view etc
-    BooleanField,  #  Boolean f
     SubmitField,  # HTML button element type
     TextAreaField,
 )
 from wtforms.validators import (
     DataRequired,  # Require data to be in that filed.
     ValidationError,  # Raise Validation error if things go bad.
-    Email,  # Require data to be considered email.
-    EqualTo,  # Require the data to equal to another field.
     Length,
 )
 

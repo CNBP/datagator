@@ -4,17 +4,12 @@
 
     <h1>Hi, {{ current_user.username }}!</h1>
 
-    <!--Displayed only when there is form. -->
-    {% if form %}
-        <!--Only can post, not get. -->
-        {{ wtf.quick_form(form) }}
-        <br>
-    {% endif %}
 
-    <!--Loop through all posts and include EACH using the _post subtemplate-->
-    {% for entry in entries %}
-        {% include '_entry.html' %}
-    {% endfor %}
+    {% if entries %}
+        {% for entry in entries %}
+            {% include '_entry.html' %}
+        {% endfor %}
+    {% endif %}    <!--Loop through all posts and include EACH using the _post subtemplate-->
 
     <!--Pagination Handle, recall it is from NEWEST to OLDEST-->
     <nav aria-label="...">

@@ -144,7 +144,9 @@ def data_view(id_entry):
             flash("Your data entry has been successfully written to the database.")
         elif form.delete_entry.data:
             # Notify the issue.
-            flash("Mock deleting this entry")
+            db.session.delete(entry_data)
+            db.commit()
+            flash(f"Entry {id_entry} was removed from the database.")
 
     # Post > Redirect > Get pattern.
     return render_template("entries/data_view.html", form=form)

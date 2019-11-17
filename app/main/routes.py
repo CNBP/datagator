@@ -15,7 +15,10 @@ from flask_login import (  # flask_login module is a module to help manage modul
 from app import db
 from app.main.forms import EditProfileForm, PostForm
 
-from app.models import User, Post  # import data base model for User and Post construct.
+from app.models import (
+    User,
+    Entry,
+)  # import data base model for User and Post construct.
 from app.main import bp
 
 
@@ -41,37 +44,30 @@ logging.basicConfig(level=logging.INFO)
 @login_required  # this marks the page as login required.
 def index():
 
-    form = PostForm()
-
-    # If form past validation, update the database with the post information and notify user while redirect to current page.
-    if form.validate_on_submit():
-        post = Post(body=form.post.data, author=current_user)
-        db.session.add(post)
-        db.session.commit()
-        flash("Your post is now live!")
-        return redirect(url_for("main.index"))
-
     # Get the page argumetn from the URL entered. Default to 1?
     page = request.args.get("page", 1, type=int)
-
+    user_current = User.query.filter_by(username=current_user.username).first()
     # Use the paginate function from SQLAlchemy to get the posts.
-    posts = current_user.followed_posts().paginate(
+    entries = Entry.query.filter_by(user_id=user_current.id).paginate(
         page, current_app.config["POSTS_PER_PAGE"], False
     )
 
     # Next URL if they exist.
-    next_url = url_for("main.index", page=posts.next_num) if posts.has_next else None
+    next_url = (
+        url_for("main.index", page=entries.next_num) if entries.has_next else None
+    )
 
     # Previous URL if they exist
-    prev_url = url_for("main.index", page=posts.prev_num) if posts.has_prev else None
+    prev_url = (
+        url_for("main.index", page=entries.prev_num) if entries.has_prev else None
+    )
 
     # Return rendered template with the variables set.
     # Post > Redirect > Get pattern.
     return render_template(
         "index.html",
         title="Home, Sweet Home!",
-        form=form,
-        posts=posts.items,  # must use ITEMS if using pagination
+        entries=entries.items,  # must use ITEMS if using pagination
         next_url=next_url,
         prev_url=prev_url,
     )

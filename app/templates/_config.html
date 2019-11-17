@@ -1,0 +1,26 @@
+<!--Subtemplate for posts. -->
+<table class="table table-hover">
+    <tr>
+        <!--Author image. -->
+        <td width="150px">
+            Posted:
+            <br>
+            Configuration ID:
+            <br>
+            LORIS Username:
+            <br>
+        </td>
+
+        <!--Author images and post body-->
+        <td>
+            {{ moment(config.timestamp).fromNow() }}:
+            <br>
+            <a href="{{ url_for('configs.update_config', config_id=config.id), }}">Config{{ config.id }}</a>
+            <br>
+            {{ config.LORISusername }}
+            <br>
+
+        </td>
+    </tr>
+</table>
+

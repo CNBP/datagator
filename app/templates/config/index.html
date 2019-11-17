@@ -1,40 +1,35 @@
-{% extends 'base.html' %}
+{% extends "base.html" %}
+{% import 'bootstrap/wtf.html' as wtf %}
+{% block app_content %}
 
-{% block header %}
-  <h1>{% block title %}Configurations{% endblock %}</h1>
-  {% if g.user %}
-    <a class="action" href="{{ url_for('configure.create') }}">New</a>
-  {% endif %}
-{% endblock %}
+    <h1>Hi, {{ current_user.username }}!</h1>
 
-{% block content %}
-  {% for configuration in configurations %}
-    <article class="configuration">
-      <header>
-        <div>
-          <h1>{{ configuration['ProxyIP'] }}</h1>
-          <div class="about">by {{ configuration['username'] }} on {{ configuration['created'].strftime('%Y-%m-%d') }}</div>
-        </div>
-        {% if g.user['id'] == configuration['user_id'] %}
-          <a class="action" href="{{ url_for('configure.update', id=configuration['id']) }}">Edit</a>
-        {% endif %}
-      </header>
-      <!--// Print configuration row result-->
-      {% set keys=configuration.keys() %}
-      {% for key in keys %}
-      <p class="{{ key }}">
-        <span class="param">{{ key }}</span>
-	<br />
-	{% if key in password_keys %}
-	  <span>{{ configuration[key]|replace(configuration[key],'******') }}</span>
-	{% else %}
-	  <span>{{ configuration[key] }}</span>
-	{% endif %}
-      </p>
-      {% endfor %}
-    </article>
-    {% if not loop.last %}
-      <hr>
+    <!--Displayed only when there is form. -->
+    {% if form %}
+        <!--Only can post, not get. -->
+        {{ wtf.quick_form(form) }}
+        <br>
     {% endif %}
-  {% endfor %}
+
+    <!--Loop through all posts and include EACH using the _post subtemplate-->
+    {% for config in configs %}
+        {% include '_config.html' %}
+    {% endfor %}
+
+    <!--Pagination Handle, recall it is from NEWEST to OLDEST-->
+    <nav aria-label="...">
+        <ul class="pager">
+            <li class="previous{% if not prev_url %} disabled{% endif %}">
+                <a href="{{ prev_url or '#' }}">
+                    <span aria-hidden="true">&larr;</span>Newer Entries
+                </a>
+            </li>
+            <li class="next{% if not next_url %} disabled{% endif %}">
+                <a href="{{ next_url or '#' }}">
+                    Older Entries <span aria-hidden="true">&rarr;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
 {% endblock %}
+

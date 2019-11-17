@@ -7,7 +7,7 @@ from hashlib import md5
 import jwt
 from time import time
 from sqlalchemy_utils import EncryptedType
-from cryptography.fernet import Fernet
+from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
 import os
 from dotenv import load_dotenv
 
@@ -212,6 +212,17 @@ class Entry(db.Model):
         db.Integer, db.ForeignKey("user.id")
     )  # used to associate who entered this entry.
 
+    def entries(self, input_user_id):
+        """
+        This method returns all the posts of this user currently follows.
+        :return:
+        """
+        # Get self own entries
+        own = Entry.query.filter_by(user_id=input_user_id)
+
+        # Return the combined results ordere by post time.
+        return own.order_by(Entry.timestamp.desc())
+
     def __repr__(self):
         return f"<Entry {self.id}>"
 
@@ -228,8 +239,8 @@ class DICOMTransitConfig(db.Model):
     # Inspired from: https://stackoverflow.com/questions/49560609/sqlalchemy-encrypt-a-column-without-automatically-decrypting-upon-retrieval
     id = db.Column(db.Integer, primary_key=True)  # hidden
     LORISurl = db.Column(db.String)
-    LORISusername = db.Column(EncryptedType(db.String, key))
-    LORISpassword = db.Column(EncryptedType(db.String, key))
+    LORISusername = db.Column(db.String)
+    LORISpassword = db.Column(db.String)
 
     timepoint_prefix = db.Column(db.String)
     institutionID = db.Column(db.String)
@@ -240,12 +251,12 @@ class DICOMTransitConfig(db.Model):
     ZipPath = db.Column(db.String)
     DevOrthancIP = db.Column(db.String)
 
-    DevOrthancUser = db.Column(EncryptedType(db.String, key))
-    DevOrthancPassword = db.Column(EncryptedType(db.String, key))
+    DevOrthancUser = db.Column(db.String)
+    DevOrthancPassword = db.Column(db.String)
 
     ProdOrthancIP = db.Column(db.String)
-    ProdOrthancUser = db.Column(EncryptedType(db.String, key))
-    ProdOrthancPassword = db.Column(EncryptedType(db.String, key))
+    ProdOrthancUser = db.Column(db.String)
+    ProdOrthancPassword = db.Column(db.String)
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)  # hidden
 

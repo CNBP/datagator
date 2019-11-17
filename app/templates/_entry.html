@@ -3,6 +3,8 @@
     <tr>
         <!--Author image. -->
         <td width="150px">
+            Entry ID:
+            <br>
             Posted:
             <br>
             MRN:
@@ -25,7 +27,9 @@
 
         <!--Author images and post body-->
         <td>
-            {{ moment(entry.timestamp).fromNow() }}:
+            <a href="{{ url_for('entries.data_view', id_entry=entry.id), }}">Entry{{ entry.id }}</a>
+            <br>
+            {{ moment(entry.timestamp).fromNow() }} on {{ entry.timestamp }}
             <br>
             {{ entry.MRN }}
             <br>

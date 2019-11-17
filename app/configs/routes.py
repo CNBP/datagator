@@ -1,18 +1,14 @@
-from datetime import datetime
 from flask import (
     render_template,  # flask function to render a HTML template with elements replaced.
     flash,  # show a message overlay.
     redirect,  # redirect to another page.
-    request,
+    current_app,
     url_for,  # used to interpret endpoints.
-    g,
 )
 from flask_login import (  # flask_login module is a module to help manage module
     login_required,  # used to @login_required decorator to indicate a route MUST be logged in before showing.
     current_user,
 )
-
-from werkzeug.exceptions import abort
 import os, sys
 
 from pathlib import Path
@@ -21,13 +17,14 @@ path_file = os.path.dirname(os.path.realpath(__file__))
 path_module = Path(path_file)
 sys.path.append(f"{path_module}")
 
-from configurator.dtconfigure.db import get_db
+from dotenv import load_dotenv
 
-# from app.config.forms import NeonatalDataForm_Submit
+from app.configs.forms import DTConfigForm, DTConfigForm_Submit, DTConfigForm_Update
 
 from app import db
 
 from app.models import (
+    User,
     DICOMTransitConfig,
 )  # import data base model for User and Post construct.
 from app.configs import bp
@@ -45,40 +42,42 @@ import logging
 logger = logging.getLogger()
 logging.basicConfig(level=logging.INFO)
 
-from DICOMTransit.LocalDB.schema import CNBP_blueprint
-
-envvars = CNBP_blueprint.dotenv_variables
+# from DICOMTransit.LocalDB.schema import CNBP_blueprint
+# envvars = CNBP_blueprint.dotenv_variables
 
 
 @login_required
-@bp.route("/settings/", methods=["GET", "POST"])
+@bp.route("/settings", methods=["GET", "POST"])
 def settings():
     """
     Show all the configurations, most recent order first
     :return:
     """
 
-    db = get_db()
-    configurations = db.execute(
-        "SELECT p.*, u.username"
-        " FROM configuration p JOIN user u ON p.user_id = u.id"
-        " ORDER BY created DESC"
-    ).fetchall()
+    # Fetch all configuration by the current users
+    # Retrieve from database the row that contain the user name.
+    user_current = User.query.filter_by(username=current_user.username).first()
+    list_configs = DICOMTransitConfig.query.filter_by(user_id=user_current.id)
 
-    # A list of password keys whose content we want to obscure on the UI
-    password_keys = [
-        "LORISpassword",
-        "ProxyPassword",
-        "LORISHostPassword",
-        "DevOrthancPassword",
-        "ProdOrthancPassword",
-    ]
+    # Needs to add a way to render the configs and click to link to <li><a href="{{ url_for('configs.update_config') }}">Update Config</a> </li>
+    configs = list_configs.paginate(1, current_app.config["POSTS_PER_PAGE"], False)
+
+    # Next URL if they exist.
+    next_url = (
+        url_for("configs.settings", page=configs.next_num) if configs.has_next else None
+    )
+
+    # Previous URL if they exist
+    prev_url = (
+        url_for("configs.settings", page=configs.prev_num) if configs.has_prev else None
+    )
+
     return render_template(
         "config/index.html",
         title="Current Configurations",
-        # form=form
-        configurations=configurations,
-        password_keys=password_keys,
+        configs=configs.items,
+        next_url=next_url,
+        prev_url=prev_url,
     )
 
 
@@ -88,181 +87,114 @@ def create_config():
     """
     The Create View
     """
-    if request.method == "POST":
-        error = None
 
-        # Check form data and get result
-        d = check_form_inputs(request.form)
-        if d is None:
-            return "Could not save data"
-        else:
-            # Create a list of Tuples because we want to use executemany
-            data = [tuple(d)]
-            # Get connection to the database and get a cursor
-            db = get_db()
-            c = db.cursor()
+    form = DTConfigForm_Submit()
 
-            # Create INSERT SQL string
-            db_frag = "INSERT INTO configuration ("
-            user_frag = "user_id,"
-            user_val_frag = "?,"
-            cols = ",".join(envvars)
-            end_cols_frag = ") "
-            vals_frag = "VALUES("
-            vals = "?," * len(envvars)
-            # remove trailing comma ,
-            vals = vals.rstrip(",")
-            end_vals_frag = ")"
-            sql = (
-                db_frag
-                + user_frag
-                + cols
-                + end_cols_frag
-                + vals_frag
-                + user_val_frag
-                + vals
-                + end_vals_frag
-            )
+    if form.validate_on_submit():
+        # Fetch all configuration by the current users
+        # Retrieve from database the row that contain the user name.
+        user_current = User.query.filter_by(username=current_user.username).first()
 
-            c.executemany(sql, data)
-            db.commit()
-            return redirect(url_for("configure.index"))
+        # Get the encryption key from the env.
+        load_dotenv()
 
-    # It's not a POST so we are showing files from configuration table
-    configurations = {}
-    # Ue list comprehension to create dict of configurations
-    # The dict keys are the samne as the dict values
-    configurations = {v: v for v in envvars}
-    return render_template("config/create.html", configurations=configurations)
+        # setup
+        from config import Config
+
+        config = DICOMTransitConfig(
+            DevOrthancIP=form.DevOrthancIP.data,
+            DevOrthancPassword=form.DevOrthancPassword.data,
+            DevOrthancUser=form.DevOrthancUser.data,
+            LORISurl=form.LORISurl.data,
+            LORISusername=form.LORISusername.data,
+            LORISpassword=form.LORISpassword.data,
+            timepoint_prefix=form.timepoint_prefix.data,
+            institutionID=form.institutionID.data,
+            institutionName=form.institutionName.data,
+            projectID_dic=form.projectID_dic.data,
+            LocalDatabasePath=form.LocalDatabasePath.data,
+            LogPath=form.LogPath.data,
+            ZipPath=form.ZipPath.data,
+            ProdOrthancIP=form.ProdOrthancIP.data,
+            ProdOrthancUser=form.ProdOrthancUser.data,
+            ProdOrthancPassword=form.ProdOrthancPassword.data,
+            user_id=user_current.id,
+        )
+        db.session.add(config)
+        db.session.commit()
+
+        # Notify the issue.
+        flash("Your config entry has been successfully written to the database.")
+        return redirect(url_for("configs.settings"))
+
+    return render_template(
+        "config/index.html", title="Add a DICOMTransit configuration", form=form
+    )
 
 
-@bp.route("/<int:id>/update", methods=("GET", "POST"))
+@bp.route("/update_config/<config_id>", methods=("GET", "POST"))
 @login_required
-def update(id):
+def update_config(config_id):
     """
     The Update View
     """
-    configuration = get_configuration(id)
-
-    if request.method == "POST":
-        error = None
-
-        # Check form data and get result
-        input_data = check_form_inputs(request.form)
-
-        if input_data is None:
-            return "Could not update data. Input data is NONE! Check how it was obtained etc. "
-        else:
-            # Create a list of Tuples because we want to use executemany
-            input_data.append(id)
-            data = [tuple(input_data)]
-            # Get connection to the database and get a cursor
-            db = get_db()
-            c = db.cursor()
-            # Create UPDATE SQL string
-            db_frag = "UPDATE configuration SET "
-            user_val_frag = "user_id=?,"
-            # Create column assighments from form data and append operator
-            # and placeholder for last element of form element
-            cols_vals = "=?,".join(envvars) + "=?"
-            where_frag = " WHERE id=?"
-            # Assemble the sql string
-            sql = db_frag + user_val_frag + cols_vals + where_frag
-            # Add logged in user id to data values for WHERE clause
-            # Execute the sql
-            c.executemany(sql, data)
-            # Commit the transaction
-            db.commit()
-            # Return by redirecting to index page
-            return redirect(url_for("configure.index"))
-
-    configurations = {}
-    # Ue list comprehension to create dict of configurations
-    # The dict keys are the samne as the dict values
-    configurations = dict(configuration)
-    # Remove columns that should not be user editable on the front-end
-    del configurations["user_id"]
-    del configurations["created"]
-    del configurations["username"]
-    password_keys = [
-        "LORISpassword",
-        "ProxyPassword",
-        "LORISHostPassword",
-        "DevOrthancPassword",
-        "ProdOrthancPassword",
-    ]
-    return render_template(
-        "configure/update.html",
-        configurations=configurations,
-        password_keys=password_keys,
-    )
-
-
-@bp.route("/<int:id>/delete", methods=("POST",))
-@login_required
-def delete(id):
     """
-    Delete View
-    :param id:
+    View function where the editing of the actual functions happen.
     :return:
     """
-
-    get_configuration(id)
-    db = get_db()
-    db.execute("DELETE FROM configuration WHERE id = ?", (id,))
-    db.commit()
-    return redirect(url_for("configure.index"))
-
-
-def check_form_inputs(form):
-    """
-    Check the form inputs
-    :param form:
-    :return:
-    """
-
-    # Create an empty list
-    data = []
-    error = ""
-
-    # Form keys
-    form_keys = list(form)
-    if sorted(form_keys) == sorted(envvars):
-        data = [str(g.user["id"])] + list(form.values())
+    form = DTConfigForm_Update()
+    # Entry ID based on the parameter passed to the page
+    entry_data = DICOMTransitConfig.query.filter_by(id=config_id).first()
+    if entry_data is None:
+        flash("No suitable data found.")
     else:
-        error = "The form values are invalid. All fields are required"
+        form.DevOrthancIP.data = entry_data.DevOrthancIP
+        form.DevOrthancPassword.data = entry_data.DevOrthancPassword
+        form.DevOrthancUser.data = entry_data.DevOrthancUser
+        form.LORISurl.data = entry_data.LORISurl
+        form.LORISusername.data = entry_data.LORISusername
+        form.LORISpassword.data = entry_data.LORISpassword
+        form.timepoint_prefix.data = entry_data.timepoint_prefix
+        form.institutionID.data = entry_data.institutionID
+        form.institutionName.data = entry_data.institutionName
+        form.projectID_dic.data = entry_data.projectID_dic
+        form.LocalDatabasePath.data = entry_data.LocalDatabasePath
+        form.LogPath.data = entry_data.LogPath
+        form.ZipPath.data = entry_data.ZipPath
+        form.ProdOrthancIP.data = entry_data.ProdOrthancIP
+        form.ProdOrthancUser.data = entry_data.ProdOrthancUser
+        form.ProdOrthancPassword.data = entry_data.ProdOrthancPassword
+        flash("Your data entry has been successfully loaded from the database.")
 
-    # If there are errors then show them and return None
-    if error is not None and error != "":
-        flash(error)
-        return None
+        # If past validation, during submission,
+        if form.validate_on_submit() and form.update_entry.data:
+            # Update.ENTRY model data
+            entry_data.DevOrthancIP = form.DevOrthancIP.data
+            entry_data.DevOrthancPassword = form.DevOrthancPassword.data
+            entry_data.DevOrthancUser = form.DevOrthancUser.data
+            entry_data.LORISurl = form.LORISurl.data
+            entry_data.LORISusername = form.LORISusername.data
+            entry_data.LORISpassword = form.LORISpassword.data
+            entry_data.timepoint_prefix = form.timepoint_prefix.data
+            entry_data.institutionID = form.institutionID.data
+            entry_data.institutionName = form.institutionName.data
+            entry_data.projectID_dic = form.projectID_dic.data
+            entry_data.LocalDatabasePath = form.LocalDatabasePath.data
+            entry_data.LogPath = form.LogPath.data
+            entry_data.ZipPath = form.ZipPath.data
+            entry_data.ProdOrthancIP = form.ProdOrthancIP.data
+            entry_data.ProdOrthancUser = form.ProdOrthancUser.data
+            entry_data.ProdOrthancPassword = form.ProdOrthancPassword.data
+            db.session.commit()
 
-    # Return the values since all is okay
-    return data
+            # Notify the issue.
+            flash("Your data entry has been successfully written to the database.")
+        elif form.delete_entry.data:
+            # Notify the issue.
+            flash(f"Deleting this entry {config_id}")
+            db.session.delete(entry_data)
+            db.commit()
+            flash(f"Config {config_id} was removed from the database.")
 
-
-def get_configuration(id, check_user=True):
-    """
-    Get configuration and check if user matches.
-    :param id:
-    :param check_user:
-    :return:
-    """
-    configuration = (
-        get_db()
-        .execute(
-            "SELECT p.*, u.username"
-            " FROM configuration p JOIN user u ON p.user_id = u.id"
-            " WHERE p.id = ?",
-            (id,),
-        )
-        .fetchone()
-    )
-
-    if configuration is None:
-        abort(404, "Configuration id {0} doesn't exist.".format(id))
-
-    if check_user and configuration["user_id"] != g.user["id"]:
-        abort(403)
-
-    return configuration
+    # Post > Redirect > Get pattern.
+    return render_template("config/index.html", form=form)

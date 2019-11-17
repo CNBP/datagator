@@ -22,3 +22,4 @@ class Config(object):
     ADMINS = ["it@cnbp.ca"]
     POSTS_PER_PAGE = 5
     LANGUAGE = ["en-CA", "fr-CA"]
+    LOG_TO_STDOUT = os.environ.get("LOG_TO_STDOUT")
