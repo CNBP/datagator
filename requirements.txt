@@ -13,3 +13,4 @@ sqlalchemy-utils
 gunicorn
 #flask-debugtoolbar
 psycopg2
+python-dotenv
