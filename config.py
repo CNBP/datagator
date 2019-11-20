@@ -1,17 +1,28 @@
 import os
 from dotenv import load_dotenv
+from pathlib import Path
 
-basedir = os.path.abspath(os.path.dirname(__file__))
-load_dotenv(os.path.join(basedir, ".env"))
+path_DataGator = Path(os.path.abspath(os.path.dirname(__file__)))
+path_DICOMTransit = path_DataGator.parent
 
 
 class Config(object):
+    """
+    This class stores the configurations loaded from the environment. 
+    """
+
     SECRET_KEY = os.environ.get("SECRET_KEY") or "you-will-never-guess"
 
-    # Path of the database URL
-    SQLALCHEMY_DATABASE_URI = os.environ.get(
-        "DATABASE_URL"
-    ) or "sqlite:///" + os.path.join(basedir, "app.db")
+    if "TRAVIS" in os.environ:
+        SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(path_DataGator, "app.db")
+    else:  # not on travis and not standalone, hence should defer to DICOMTransit .env settings.
+
+        # Load .env from DICOMTransit path.
+        load_dotenv(path_DICOMTransit / ".env")
+
+        # Get the path of the database URL from the environment.
+        SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.environ.get("datagator_database")
+
     SQLALCHEMY_TRACK_MODIFICATION = False
 
     MAIL_SERVER = os.environ.get("MAIL_SERVER")

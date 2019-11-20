@@ -11,13 +11,15 @@ from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_babel import Babel
 
+
+# Import the Config class from the config.py file.
 from config import Config
 
 app = Flask(__name__)
 
 logger = logging.getLogger()
 
-# Load configuration from the object class.
+# Load configuration from the object class, and set it for the app.
 app.config.from_object(Config)
 
 # Initialize the VARIOUS INSTANCES of PLUGINS by passing the app context to them
@@ -36,6 +38,11 @@ babel = Babel(app)
 
 
 def create_app(config_class=Config):
+    """
+    Create the app, initialize the submodules based on the app to establish the context.
+    Then import and register the blueprint.
+    """
+
     app = Flask(__name__)
     app.config.from_object(config_class)
 
@@ -47,6 +54,7 @@ def create_app(config_class=Config):
     moment.init_app(app)
     babel.init_app(app)
 
+    # Import the various blueprints from the submodules to be integrated together.
     from app.errors import bp as erros_bp
     from app.auth import bp as auth_bp
     from app.entries import bp as entries_bp

@@ -3,7 +3,7 @@ from app import (
     db,
 )  #  a Python script at the top-level that defines the Flask application
 
-# instance
+# instantiate the Flask app using the create app method there with the default parameter.
 app = create_app()
 from app.models import User, Post
 
