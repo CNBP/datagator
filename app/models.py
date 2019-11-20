@@ -27,15 +27,6 @@ def load_user(id):
 # ```
 
 
-# This table has a column to track follower number 1 to follower number 2
-# This table is not a model.
-followers = db.Table(
-    "followers",
-    db.Column("follower_id", db.Integer, db.ForeignKey("user.id")),
-    db.Column("followed_id", db.Integer, db.ForeignKey("user.id")),
-)
-
-
 class Post(db.Model):
     """
     This is the post class, used to model the data brought on
@@ -54,6 +45,14 @@ class User(UserMixin, db.Model):
     """
     Database Model Class
     """
+
+    # This table has a column to track follower number 1 to follower number 2
+    # This table is not a model.
+    followers = db.Table(
+        "followers",
+        db.Column("follower_id", db.Integer, db.ForeignKey("user.id")),
+        db.Column("followed_id", db.Integer, db.ForeignKey("user.id")),
+    )
 
     # User database model
     id = db.Column(db.Integer, primary_key=True)
@@ -91,6 +90,15 @@ class User(UserMixin, db.Model):
         This method returns all the posts of this user currently follows.
         :return:
         """
+
+        # This table has a column to track follower number 1 to follower number 2
+        # This table is not a model.
+        followers = db.Table(
+            "followers",
+            db.Column("follower_id", db.Integer, db.ForeignKey("user.id")),
+            db.Column("followed_id", db.Integer, db.ForeignKey("user.id")),
+        )
+
         # Get followed posts.
         followed = Post.query.join(
             followers, (followers.c.followed_id == Post.user_id)
@@ -158,6 +166,14 @@ class User(UserMixin, db.Model):
         :param user:
         :return:
         """
+        # This table has a column to track follower number 1 to follower number 2
+        # This table is not a model.
+        followers = db.Table(
+            "followers",
+            db.Column("follower_id", db.Integer, db.ForeignKey("user.id")),
+            db.Column("followed_id", db.Integer, db.ForeignKey("user.id")),
+        )
+
         return self.followed.filter(followers.c.followed_id == user.id).count() > 0
 
     def get_reset_password_token(self, expires_in=600):
