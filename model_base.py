@@ -46,5 +46,27 @@ class DICOMTransitConfig(datagator_db.Model):
         datagator_db.Integer, datagator_db.ForeignKey("user.id")
     )  # used to associate who entered this entry. # hidden
 
-    def __repr__(self):
-        return f"<DICOMTransitConfig {self.id} by {self.user_id} on {self.timestamp}>"
+
+class Entry(datagator_db.Model):
+    """
+    This is used to model the data entry from the user regarding the scans.
+    """
+
+    id = datagator_db.Column(datagator_db.Integer, primary_key=True)
+    MRN = datagator_db.Column(datagator_db.Integer)
+    CNBPID = datagator_db.Column(datagator_db.String(10))
+    birth_weight = datagator_db.Column(datagator_db.String(140))
+    birth_date = datagator_db.Column(datagator_db.Date)
+    birth_time = datagator_db.Column(datagator_db.Time)
+    mri_date = datagator_db.Column(datagator_db.Date)
+    mri_reason = datagator_db.Column(datagator_db.String)
+    # Many more fields to add here.
+    mri_dx = datagator_db.Column(datagator_db.String)  # JSON string
+    dicharge_diagoses = datagator_db.Column(datagator_db.String)
+    mri_age = datagator_db.Column(datagator_db.String)
+    timestamp = datagator_db.Column(
+        datagator_db.DateTime, index=True, default=datetime.utcnow
+    )
+    user_id = datagator_db.Column(
+        datagator_db.Integer, datagator_db.ForeignKey("user.id")
+    )  # used to associate who entered this entry.

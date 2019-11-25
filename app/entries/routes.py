@@ -75,10 +75,10 @@ def data_entry():
 
         # Notify the issue.
         flash("Your data entry has been successfully written to the database.")
-        return redirect(url_for("entries.index"))
+        return redirect(url_for("entries.data_request"))
 
     return render_template(
-        "entries/data_entry.html", title="Add a Data Entry", form=form
+        "entries/TEntryCreate.html", title="Add a Data Entry", form=form
     )
 
 
@@ -97,7 +97,7 @@ def data_request():
         flash(f"Requesting entry data from ID={str(id_form)}.")
         return redirect(url_for("entries.data_view", id_entry=id_form))
     return render_template(
-        "entries/data_view.html", title="Load a Data Entry", form=form
+        "entries/TEntryView.html", title="Load a Data Entry", form=form
     )
 
 
@@ -149,4 +149,4 @@ def data_view(id_entry):
             flash(f"Entry {id_entry} was removed from the database.")
 
     # Post > Redirect > Get pattern.
-    return render_template("entries/data_view.html", form=form)
+    return render_template("entries/TEntryView.html", form=form)

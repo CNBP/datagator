@@ -73,7 +73,7 @@ def settings():
     )
 
     return render_template(
-        "config/index.html",
+        "config/TConfigIndex.html",
         title="Current Configurations",
         configs=configs.items,
         next_url=next_url,
@@ -128,7 +128,7 @@ def create_config():
         return redirect(url_for("configs.settings"))
 
     return render_template(
-        "config/index.html", title="Add a DICOMTransit configuration", form=form
+        "config/TConfigCreate.html", title="Add a DICOMTransit configuration", form=form
     )
 
 
@@ -197,4 +197,4 @@ def update_config(config_id):
             flash(f"Config {config_id} was removed from the database.")
 
     # Post > Redirect > Get pattern.
-    return render_template("config/index.html", form=form)
+    return render_template("config/TConfigView.html", form=form)

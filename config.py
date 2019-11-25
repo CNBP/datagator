@@ -23,7 +23,7 @@ class Config(object):
         # Get the path of the database URL from the environment.
         SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.environ.get("datagator_database")
 
-    SQLALCHEMY_TRACK_MODIFICATION = False
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     MAIL_SERVER = os.environ.get("MAIL_SERVER")
     MAIL_PORT = int(os.environ.get("MAIL_PORT") or 25)
