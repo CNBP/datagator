@@ -2,7 +2,7 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from dotenv import load_dotenv
-from config import get_DataGator_DataBaseURI
+from config_datagator import get_DataGator_DataBaseURI
 import os
 
 load_dotenv()

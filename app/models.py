@@ -307,14 +307,47 @@ class DICOMTransitConfig(db.Model):
     LocalDatabasePath = db.Column(db.String)
     LogPath = db.Column(db.String)
     ZipPath = db.Column(db.String)
-    DevOrthancIP = db.Column(db.String)
 
+    # Orthanc configuration
+    DevOrthancIP = db.Column(db.String)
     DevOrthancUser = db.Column(db.String)
     DevOrthancPassword = db.Column(db.String)
 
     ProdOrthancIP = db.Column(db.String)
     ProdOrthancUser = db.Column(db.String)
     ProdOrthancPassword = db.Column(db.String)
+
+    # RedCap related data control.
+
+    REDCAP_TOKEN_CNN_ADMISSION = db.Column(db.String)
+    REDCAP_TOKEN_CNN_BABY = db.Column(db.String)
+    REDCAP_TOKEN_CNN_MOTHER = db.Column(db.String)
+    REDCAP_TOKEN_CNN_MASTER = db.Column(db.String)
+    REDCAP_TOKEN_CNFUN_PATIENT = db.Column(db.String)
+    REDCAP_API_URL = db.Column(db.String)
+    CNN_CONNECTION_STRING = db.Column(db.String)
+    CNFUN_CONNECTION_STRING = db.Column(db.String)
+    USE_LOCAL_HOSPITAL_RECORD_NUMBERS_LIST = db.Column(db.Integer)
+    NUMBER_OF_RECORDS_PER_BATCH = db.Column(db.Integer)
+
+    # RedCap export related data control
+    REDCAP_EXPORT_ENABLED = db.Column(db.String)
+
+    # MySQL
+    MYSQL_EXPORT_ENABLED = db.Column(db.String)
+    MYSQL_EXPORT_HOST = db.Column(db.String)
+    MYSQL_EXPORT_PORT = db.Column(db.String)
+    MYSQL_EXPORT_DATABASE = db.Column(db.String)
+    MYSQL_EXPORT_USER = db.Column(db.String)
+    MYSQL_EXPORT_PASSWORD = db.Column(db.String)
+
+    # CouchDB
+    COUCHDB_EXPORT_ENABLED = db.Column(db.String)
+    COUCHDB_EXPORT_HOST = db.Column(db.String)
+    COUCHDB_EXPORT_PORT = db.Column(db.String)
+    COUCHDB_EXPORT_DATABASE = db.Column(db.String)
+    COUCHDB_EXPORT_USER = db.Column(db.String)
+    COUCHDB_EXPORT_PASSWORD = db.Column(db.String)
 
     timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)  # hidden
 

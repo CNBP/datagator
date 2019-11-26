@@ -12,8 +12,8 @@ from flask_moment import Moment
 from flask_babel import Babel
 from flask_restplus import Api, Namespace, Resource, fields
 
-# Import the Config class from the config.py file.
-from config import Config
+# Import the Config class from the config_datagator.py file.
+from config_datagator import Config
 
 app = Flask(__name__)
 

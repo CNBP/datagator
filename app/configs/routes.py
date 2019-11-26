@@ -99,7 +99,7 @@ def create_config():
         load_dotenv()
 
         # setup
-        from config import Config
+        from config_datagator import Config
 
         config = DICOMTransitConfig(
             DevOrthancIP=form.DevOrthancIP.data,

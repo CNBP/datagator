@@ -5,6 +5,7 @@ from app import (
 
 # instantiate the Flask app using the create app method there with the default parameter.
 app = create_app()
+
 from app.models import User, Post
 
 

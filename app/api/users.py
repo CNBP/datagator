@@ -1,4 +1,4 @@
-from app.api import api_interface
+from app import api_interface
 from app.models import User
 from flask import jsonify
 from flask_restplus import Resource
@@ -8,7 +8,9 @@ from flask_restplus import Resource
 class User(Resource):
     def get(self, id):
         return jsonify(User.query.get_or_404(id).to_dict())
-    def post
+
+
+#    def post
 
 
 @api_interface.route("/users/")
