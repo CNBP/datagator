@@ -10,7 +10,7 @@ from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_babel import Babel
-
+from flask_restplus import Api, Namespace, Resource, fields
 
 # Import the Config class from the config.py file.
 from config import Config
@@ -36,6 +36,9 @@ bootstrap = Bootstrap(app)
 moment = Moment(app)
 babel = Babel(app)
 
+# Establishing API context
+api_interface = Api()
+
 
 def create_app(config_class=Config):
     """
@@ -54,12 +57,21 @@ def create_app(config_class=Config):
     moment.init_app(app)
     babel.init_app(app)
 
+    # API related setup.
+    api_interface.init_app(app)
+    api_interface.version = "1.0"
+    api_interface.title = "DataGator API"
+    api_interface.description = "A MVP API for DataGator implementing RestPlus+"
+    # api_interface.add_namespace(api.users)
+    # ns = api_interface.namespace("TestAPIs")
+
     # Import the various blueprints from the submodules to be integrated together.
     from app.errors import bp as erros_bp
     from app.auth import bp as auth_bp
     from app.entries import bp as entries_bp
     from app.main import bp as main_bp
     from app.configs import bp as config_bp
+    from app.api import bp as api_bp
 
     # Register blueprint
     app.register_blueprint(erros_bp)
@@ -67,6 +79,7 @@ def create_app(config_class=Config):
     app.register_blueprint(entries_bp)  # extra name spacing.
     app.register_blueprint(main_bp)
     app.register_blueprint(config_bp)
+    app.register_blueprint(api_bp, url_prefix="/api")
 
     if app.config["LOG_TO_STDOUT"]:
         stream_handler = logging.StreamHandler()

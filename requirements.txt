@@ -9,6 +9,7 @@ flask-wtf
 flask-bootstrap
 flask-moment
 flask-babel
+flask-restplus
 sqlalchemy-utils
 gunicorn
 #flask-debugtoolbar

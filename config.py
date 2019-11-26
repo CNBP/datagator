@@ -19,9 +19,15 @@ class Config(object):
 
         # Load .env from DICOMTransit path.
         load_dotenv(path_DICOMTransit / ".env")
-
-        # Get the path of the database URL from the environment.
-        SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.environ.get("datagator_database")
+        if "datagator_database" in os.environ:
+            # Get the path of the database URL from the environment.
+            SQLALCHEMY_DATABASE_URI = f"sqlite:///" + os.environ.get(
+                "datagator_database"
+            )
+        else:
+            SQLALCHEMY_DATABASE_URI = f"sqlite:///" + os.path.join(
+                path_DataGator, "app.db"
+            )
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

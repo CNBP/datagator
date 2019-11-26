@@ -1,5 +1,5 @@
 from app import db, login
-from flask import current_app
+from flask import current_app, url_for
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
@@ -204,6 +204,48 @@ class User(UserMixin, db.Model):
         except:
             return
         return User.query.get(id)
+
+    def to_dict(self, include_email=False):
+        """
+        A way to represent the data base object as JSON dictionary
+        :param include_email:
+        :return:
+        """
+        data = {
+            "id": self.id,
+            "username": self.username,
+            "last_seen": self.last_seen.isoformat() + "Z",
+            "about_me": self.about_me,
+            "post_count": self.posts.count(),
+            "follower_count": self.followers.count(),
+            "followed_count": self.followed.count(),
+            "_links": {
+                "self": url_for("api.get_user", id=self.id),
+                #                "followers": url_for("api.get_followers", id=self.id),
+                #                "followed": url_for("api.get_followed", id=self.id),
+                "avatar": self.avatar(128),
+            },
+        }
+        if include_email:
+            data["email"] = self.email
+        return data
+
+    def from_dict(self, data, new_user=False):
+        """
+        Convert data from a dictionary object.
+        :param data:
+        :param new_user:
+        :return:
+        """
+        for field in ["username", "email", "about_me"]:
+            if (
+                field in data
+            ):  # check to makes sure those fields exist in the data received.
+                setattr(self, field, data[field])
+            if (
+                new_user and "password" in data
+            ):  # only set password if we have received them.
+                self.set_password(data["password"])
 
 
 class Entry(db.Model):
