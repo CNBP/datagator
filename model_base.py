@@ -11,65 +11,93 @@ app = Flask("DataGatorSQLAlchemyAccessor")
 app.config["SQLALCHEMY_DATABASE_URI"] = get_DataGator_DataBaseURI()
 
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-datagator_db = SQLAlchemy(app)
+db = SQLAlchemy(app)
 
 
-class DICOMTransitConfig(datagator_db.Model):
+class DICOMTransitConfig(db.Model):
     """
     This is used to model the configuration entry from the user regarding DICOMTransit Operation.
     """
 
     # Inspired from: https://stackoverflow.com/questions/49560609/sqlalchemy-encrypt-a-column-without-automatically-decrypting-upon-retrieval
-    id = datagator_db.Column(datagator_db.Integer, primary_key=True)  # hidden
-    LORISurl = datagator_db.Column(datagator_db.String)
-    LORISusername = datagator_db.Column(datagator_db.String)
-    LORISpassword = datagator_db.Column(datagator_db.String)
+    id = db.Column(db.Integer, primary_key=True)  # hidden
+    LORISurl = db.Column(db.String)
+    LORISusername = db.Column(db.String)
+    LORISpassword = db.Column(db.String)
 
-    timepoint_prefix = datagator_db.Column(datagator_db.String)
-    institutionID = datagator_db.Column(datagator_db.String)
-    institutionName = datagator_db.Column(datagator_db.String)
-    projectID_dic = datagator_db.Column(datagator_db.String)
-    LocalDatabasePath = datagator_db.Column(datagator_db.String)
-    LogPath = datagator_db.Column(datagator_db.String)
-    ZipPath = datagator_db.Column(datagator_db.String)
-    DevOrthancIP = datagator_db.Column(datagator_db.String)
+    timepoint_prefix = db.Column(db.String)
+    institutionID = db.Column(db.String)
+    institutionName = db.Column(db.String)
+    projectID_dic = db.Column(db.String)
+    LocalDatabasePath = db.Column(db.String)
+    LogPath = db.Column(db.String)
+    ZipPath = db.Column(db.String)
+    DevOrthancIP = db.Column(db.String)
 
-    DevOrthancUser = datagator_db.Column(datagator_db.String)
-    DevOrthancPassword = datagator_db.Column(datagator_db.String)
+    DevOrthancUser = db.Column(db.String)
+    DevOrthancPassword = db.Column(db.String)
 
-    ProdOrthancIP = datagator_db.Column(datagator_db.String)
-    ProdOrthancUser = datagator_db.Column(datagator_db.String)
-    ProdOrthancPassword = datagator_db.Column(datagator_db.String)
+    ProdOrthancIP = db.Column(db.String)
+    ProdOrthancUser = db.Column(db.String)
+    ProdOrthancPassword = db.Column(db.String)
 
-    timestamp = datagator_db.Column(
-        datagator_db.DateTime, index=True, default=datetime.utcnow
-    )  # hidden
+    # RedCap related data control.
 
-    user_id = datagator_db.Column(
-        datagator_db.Integer, datagator_db.ForeignKey("user.id")
+    REDCAP_TOKEN_CNN_ADMISSION = db.Column(db.String)
+    REDCAP_TOKEN_CNN_BABY = db.Column(db.String)
+    REDCAP_TOKEN_CNN_MOTHER = db.Column(db.String)
+    REDCAP_TOKEN_CNN_MASTER = db.Column(db.String)
+    REDCAP_TOKEN_CNFUN_PATIENT = db.Column(db.String)
+    REDCAP_API_URL = db.Column(db.String)
+    CNN_CONNECTION_STRING = db.Column(db.String)
+    CNFUN_CONNECTION_STRING = db.Column(db.String)
+    USE_LOCAL_HOSPITAL_RECORD_NUMBERS_LIST = db.Column(db.Integer)
+    NUMBER_OF_RECORDS_PER_BATCH = db.Column(db.Integer)
+
+    # RedCap export related data control
+    REDCAP_EXPORT_ENABLED = db.Column(db.String)
+
+    # MySQL
+    MYSQL_EXPORT_ENABLED = db.Column(db.String)
+    MYSQL_EXPORT_HOST = db.Column(db.String)
+    MYSQL_EXPORT_PORT = db.Column(db.String)
+    MYSQL_EXPORT_DATABASE = db.Column(db.String)
+    MYSQL_EXPORT_USER = db.Column(db.String)
+    MYSQL_EXPORT_PASSWORD = db.Column(db.String)
+
+    # CouchDB
+    COUCHDB_EXPORT_ENABLED = db.Column(db.String)
+    COUCHDB_EXPORT_HOST = db.Column(db.String)
+    COUCHDB_EXPORT_PORT = db.Column(db.String)
+    COUCHDB_EXPORT_DATABASE = db.Column(db.String)
+    COUCHDB_EXPORT_USER = db.Column(db.String)
+    COUCHDB_EXPORT_PASSWORD = db.Column(db.String)
+
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)  # hidden
+
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id")
     )  # used to associate who entered this entry. # hidden
 
 
-class Entry(datagator_db.Model):
+class Entry(db.Model):
     """
     This is used to model the data entry from the user regarding the scans.
     """
 
-    id = datagator_db.Column(datagator_db.Integer, primary_key=True)
-    MRN = datagator_db.Column(datagator_db.Integer)
-    CNBPID = datagator_db.Column(datagator_db.String(10))
-    birth_weight = datagator_db.Column(datagator_db.String(140))
-    birth_date = datagator_db.Column(datagator_db.Date)
-    birth_time = datagator_db.Column(datagator_db.Time)
-    mri_date = datagator_db.Column(datagator_db.Date)
-    mri_reason = datagator_db.Column(datagator_db.String)
+    id = db.Column(db.Integer, primary_key=True)
+    MRN = db.Column(db.Integer)
+    CNBPID = db.Column(db.String(10))
+    birth_weight = db.Column(db.String(140))
+    birth_date = db.Column(db.Date)
+    birth_time = db.Column(db.Time)
+    mri_date = db.Column(db.Date)
+    mri_reason = db.Column(db.String)
     # Many more fields to add here.
-    mri_dx = datagator_db.Column(datagator_db.String)  # JSON string
-    dicharge_diagoses = datagator_db.Column(datagator_db.String)
-    mri_age = datagator_db.Column(datagator_db.String)
-    timestamp = datagator_db.Column(
-        datagator_db.DateTime, index=True, default=datetime.utcnow
-    )
-    user_id = datagator_db.Column(
-        datagator_db.Integer, datagator_db.ForeignKey("user.id")
+    mri_dx = db.Column(db.String)  # JSON string
+    dicharge_diagoses = db.Column(db.String)
+    mri_age = db.Column(db.String)
+    timestamp = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+    user_id = db.Column(
+        db.Integer, db.ForeignKey("user.id")
     )  # used to associate who entered this entry.
