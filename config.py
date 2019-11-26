@@ -6,17 +6,14 @@ path_DataGator = Path(os.path.abspath(os.path.dirname(__file__)))
 path_DICOMTransit = path_DataGator.parent
 
 
-class Config(object):
+def get_DataGator_DataBaseURI():
     """
-    This class stores the configurations loaded from the environment. 
+    A dedicated way to get database URI regardless if Travis or not.
+    :return:
     """
-
-    SECRET_KEY = os.environ.get("SECRET_KEY") or "you-will-never-guess"
-
     if "TRAVIS" in os.environ:
-        SQLALCHEMY_DATABASE_URI = "sqlite:///" + os.path.join(path_DataGator, "app.db")
+        URI = "sqlite:///" + os.path.join(path_DataGator, "app.db")
     else:  # not on travis and not standalone, hence should defer to DICOMTransit .env settings.
-
         # Load .env from DICOMTransit path.
         load_dotenv(path_DICOMTransit / ".env")
         if "datagator_database" in os.environ:
@@ -28,6 +25,20 @@ class Config(object):
             SQLALCHEMY_DATABASE_URI = f"sqlite:///" + os.path.join(
                 path_DataGator, "app.db"
             )
+
+        # Get the path of the database URL from the environment.
+        URI = "sqlite:///" + os.environ.get("datagator_database")
+    return URI
+
+
+class Config(object):
+    """
+    This class stores the configurations loaded from the environment. 
+    """
+
+    SECRET_KEY = os.environ.get("SECRET_KEY") or "you-will-never-guess"
+
+    SQLALCHEMY_DATABASE_URI = get_DataGator_DataBaseURI()
 
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 

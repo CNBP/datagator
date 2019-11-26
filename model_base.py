@@ -2,11 +2,14 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 from dotenv import load_dotenv
+from config import get_DataGator_DataBaseURI
 import os
 
 load_dotenv()
 app = Flask("DataGatorSQLAlchemyAccessor")
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///" + os.getenv("datagator_database")
+
+app.config["SQLALCHEMY_DATABASE_URI"] = get_DataGator_DataBaseURI()
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 datagator_db = SQLAlchemy(app)
 
