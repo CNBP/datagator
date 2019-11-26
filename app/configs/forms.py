@@ -4,6 +4,7 @@ from wtforms import (
     PasswordField,  # used to hide LORIS and Orthanc password fields from view.
     SubmitField,
     BooleanField,
+    IntegerField,
     Field,
 )
 
@@ -94,8 +95,42 @@ class DTConfigForm(FlaskForm):
     )
     ProdOrthancPassword = PasswordField(
         "Password of the Production Orthanc",
-        validators=[DataRequired("Password of the production orthanc deloyed.")],
+        validators=[DataRequired("Password of the production Orthanc deloyed.")],
     )
+
+    CNFUN_CONNECTION_STRING = StringField(
+        "Connection String to connect to the local CNFUN database. In the format of, Driver=;XYZ, DBQ=XYZ;, PWD=XYZ;, CHARSET=XYZ;"
+    )
+    CNN_CONNECTION_STRING = StringField(
+        "Connection String to connect to the local CNN database. In the format of, Driver=XYZ;, DBQ=XYZ;, PWD=XYZ;, CHARSET=XYZ;"
+    )
+
+    COUCHDB_EXPORT_ENABLED = BooleanField("")
+    COUCHDB_EXPORT_DATABASE = StringField("")
+    COUCHDB_EXPORT_HOST = StringField("")
+    COUCHDB_EXPORT_PORT = StringField("")
+    COUCHDB_EXPORT_USER = StringField("")
+    COUCHDB_EXPORT_PASSWORD = PasswordField("")
+
+    MYSQL_EXPORT_ENABLED = BooleanField("")
+    MYSQL_EXPORT_DATABASE = StringField("")
+    MYSQL_EXPORT_HOST = StringField("")
+    MYSQL_EXPORT_PORT = StringField("")
+    MYSQL_EXPORT_USER = StringField("")
+    MYSQL_EXPORT_PASSWORD = PasswordField("")
+
+    NUMBER_OF_RECORDS_PER_BATCH = StringField("")
+
+    REDCAP_API_URL = StringField("")
+    REDCAP_EXPORT_ENABLED = BooleanField("")
+
+    REDCAP_TOKEN_CNFUN_PATIENT = PasswordField("")
+    REDCAP_TOKEN_CNN_ADMISSION = PasswordField("")
+    REDCAP_TOKEN_CNN_BABY = PasswordField("")
+    REDCAP_TOKEN_CNN_MASTER = PasswordField("")
+    REDCAP_TOKEN_CNN_MOTHER = PasswordField("")
+
+    USE_LOCAL_HOSPITAL_RECORD_NUMBERS_LIST = BooleanField("")
 
     """
     Make sure to update the validator fields below should you change or rename anything here! 
@@ -103,11 +138,7 @@ class DTConfigForm(FlaskForm):
     """
 
     def validate_path(self, path_input: Field):
-
-        if Path(path_input.data).exists():
-            return True
-        else:
-            return False
+        return Path(path_input.data).exists()
 
 
 class DTConfigForm_Submit(DTConfigForm):

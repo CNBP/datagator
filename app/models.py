@@ -6,8 +6,9 @@ from flask_login import UserMixin
 from hashlib import md5
 import jwt
 from time import time
-from sqlalchemy_utils import EncryptedType
-from sqlalchemy_utils.types.encrypted.encrypted_type import AesEngine
+import sqlalchemy as sa
+from sqlalchemy_utils import EncryptedType, URLType
+from sqlalchemy_utils.types.encrypted.encrypted_type import FernetEngine
 import os
 from dotenv import load_dotenv
 
@@ -296,9 +297,9 @@ class DICOMTransitConfig(db.Model):
 
     # Inspired from: https://stackoverflow.com/questions/49560609/sqlalchemy-encrypt-a-column-without-automatically-decrypting-upon-retrieval
     id = db.Column(db.Integer, primary_key=True)  # hidden
-    LORISurl = db.Column(db.String)
+    LORISurl = db.Column(URLType)
     LORISusername = db.Column(db.String)
-    LORISpassword = db.Column(db.String)
+    LORISpassword = db.Column(EncryptedType(db.Unicode, key, FernetEngine))
 
     timepoint_prefix = db.Column(db.String)
     institutionID = db.Column(db.String)

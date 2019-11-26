@@ -35,9 +35,7 @@ bootstrap = Bootstrap(app)
 
 moment = Moment(app)
 babel = Babel(app)
-
-# Establishing API context
-api_interface = Api()
+api_interface = Api(app)
 
 
 def create_app(config_class=Config):
@@ -56,14 +54,7 @@ def create_app(config_class=Config):
     bootstrap.init_app(app)
     moment.init_app(app)
     babel.init_app(app)
-
-    # API related setup.
     api_interface.init_app(app)
-    api_interface.version = "1.0"
-    api_interface.title = "DataGator API"
-    api_interface.description = "A MVP API for DataGator implementing RestPlus+"
-    # api_interface.add_namespace(api.users)
-    # ns = api_interface.namespace("TestAPIs")
 
     # Import the various blueprints from the submodules to be integrated together.
     from app.errors import bp as erros_bp
@@ -72,6 +63,16 @@ def create_app(config_class=Config):
     from app.main import bp as main_bp
     from app.configs import bp as config_bp
     from app.api import bp as api_bp
+
+    # Establishing API context
+    api_interface = Api(api_bp, doc="/doc/")
+    # API related setup.
+    api_interface.init_app(app)
+    api_interface.version = "1.0"
+    api_interface.title = "DataGator API"
+    api_interface.description = "A MVP API for DataGator implementing RestPlus+"
+    # api_interface.add_namespace(api.users)
+    # ns = api_interface.namespace("TestAPIs")
 
     # Register blueprint
     app.register_blueprint(erros_bp)
