@@ -1,8 +1,9 @@
 from flask_restplus import Api
 from flask import Blueprint
-from .users import api as ns1
+from .users import api_user
+from .entries import api_entry
 
-bp = Blueprint("api", __name__)
+bp = Blueprint("api_user", __name__)
 api_interface = Api(
     bp,
     title="DataGator API",
@@ -10,4 +11,5 @@ api_interface = Api(
     description="A MVP API for DataGator implementing RestPlus+",
     doc="/doc/",
 )
-api_interface.add_namespace(ns1, path="/users")
+api_interface.add_namespace(api_user, path="/users")
+api_interface.add_namespace(api_entry, path="/entrys")

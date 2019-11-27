@@ -2,9 +2,9 @@ from app.models import User
 from flask import jsonify
 from flask_restplus import Namespace, Resource, fields
 
-api = Namespace("Users", description="Users related operations")
+api_user = Namespace("Users", description="Users related operations")
 
-user = api.model(
+user = api_user.model(
     "User",
     {
         "id": fields.String(required=True, description="The user identifier"),
@@ -13,23 +13,23 @@ user = api.model(
 )
 
 
-@api.route("/")
+@api_user.route("/")
 class CatList(Resource):
-    @api.doc("list_users")
-    @api.marshal_list_with(user)
+    @api_user.doc("list_users")
+    @api_user.marshal_list_with(user)
     def get(self):
         return jsonify(User.query.get_or_404(id).to_dict())
 
 
-@api.route("/<id>")
-@api.param("id", "The user identifier")
-@api.response(404, "Cat not found")
+@api_user.route("/<id_user>")
+@api_user.param("id_user", "The user identifier")
+@api_user.response(404, "Cat not found")
 class Cat(Resource):
-    @api.doc("get_user")
-    @api.marshal_with(user)
-    def get(self, id):
+    @api_user.doc("get_user")
+    @api_user.marshal_with(user)
+    def get(self, id_user):
         """Fetch a user given its identifier"""
-        for user in User.query.get_or_404(id).to_dict():
-            if user["id"] == id:
+        for user in User.query.get_or_404(id_user).to_dict():
+            if user["id_user"] == id_user:
                 return user
-        api.abort(404)
+        api_user.abort(404)
