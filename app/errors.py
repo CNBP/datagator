@@ -2,7 +2,7 @@ from flask import render_template, request
 from app import db
 from app.errors import bp
 
-# from app.api.errors import error_response as api_error_response
+# from app.api_interface.errors import error_response as api_error_response
 
 """
 def wnats_json_response():

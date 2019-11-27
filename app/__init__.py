@@ -10,7 +10,8 @@ from flask_mail import Mail
 from flask_bootstrap import Bootstrap
 from flask_moment import Moment
 from flask_babel import Babel
-from flask_restplus import Api, Namespace, Resource, fields
+from flask_restplus import Api
+
 
 # Import the Config class from the config_datagator.py file.
 from config_datagator import Config
@@ -32,21 +33,22 @@ login.login_view = "auth.login"
 login.login_message = "Please log in to access this page."
 
 bootstrap = Bootstrap(app)
-
 moment = Moment(app)
 babel = Babel(app)
-api_interface = Api(app)
 
 
 def create_app(config_class=Config):
     """
-    Create the app, initialize the submodules based on the app to establish the context.
+    Factory method which create the app, initialize the submodules based on the app to establish the context.
     Then import and register the blueprint.
     """
 
+    # Instantiate Flask object.
     app = Flask(__name__)
+    # Condfigure from setting.
     app.config.from_object(config_class)
 
+    # Intialize various pobject.
     db.init_app(app)
     migrate.init_app(app, db)
     login.init_app(app)
@@ -54,7 +56,6 @@ def create_app(config_class=Config):
     bootstrap.init_app(app)
     moment.init_app(app)
     babel.init_app(app)
-    api_interface.init_app(app)
 
     # Import the various blueprints from the submodules to be integrated together.
     from app.errors import bp as erros_bp
@@ -62,17 +63,7 @@ def create_app(config_class=Config):
     from app.entries import bp as entries_bp
     from app.main import bp as main_bp
     from app.configs import bp as config_bp
-    from app.api import bp as api_bp
-
-    # Establishing API context
-    api_interface = Api(api_bp, doc="/doc/")
-    # API related setup.
-    api_interface.init_app(app)
-    api_interface.version = "1.0"
-    api_interface.title = "DataGator API"
-    api_interface.description = "A MVP API for DataGator implementing RestPlus+"
-    # api_interface.add_namespace(api.users)
-    # ns = api_interface.namespace("TestAPIs")
+    from app.apis import bp as api_bp
 
     # Register blueprint
     app.register_blueprint(erros_bp)
@@ -80,7 +71,7 @@ def create_app(config_class=Config):
     app.register_blueprint(entries_bp)  # extra name spacing.
     app.register_blueprint(main_bp)
     app.register_blueprint(config_bp)
-    app.register_blueprint(api_bp, url_prefix="/api")
+    app.register_blueprint(api_bp, url_prefix="/api/v001")
 
     if app.config["LOG_TO_STDOUT"]:
         stream_handler = logging.StreamHandler()

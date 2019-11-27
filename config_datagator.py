@@ -18,16 +18,10 @@ def get_DataGator_DataBaseURI():
         load_dotenv(path_DICOMTransit / ".env")
         if "datagator_database" in os.environ:
             # Get the path of the database URL from the environment.
-            SQLALCHEMY_DATABASE_URI = f"sqlite:///" + os.environ.get(
-                "datagator_database"
-            )
+            URI = "sqlite:///" + os.environ.get("datagator_database")
         else:
-            SQLALCHEMY_DATABASE_URI = f"sqlite:///" + os.path.join(
-                path_DataGator, "app.db"
-            )
+            URI = "sqlite:///" + os.path.join(path_DataGator, "app.db")
 
-        # Get the path of the database URL from the environment.
-        URI = "sqlite:///" + os.environ.get("datagator_database")
     return URI
 
 
