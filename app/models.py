@@ -11,6 +11,7 @@ from sqlalchemy_utils import EncryptedType, URLType
 from sqlalchemy_utils.types.encrypted.encrypted_type import FernetEngine
 import os
 from dotenv import load_dotenv
+import json
 
 
 @login.user_loader
@@ -286,6 +287,53 @@ class Entry(db.Model):
     def __repr__(self):
         return f"<Entry {self.id}>"
 
+    def fields(self) -> list:
+        """
+        Obtain all fields and filter them to include on the relevant fields.
+        :param entry:
+        :return:
+        """
+        # Get Key fields from the keys of the dictionary of the ORM model
+        keys_fields = self.__dict__.keys()
+
+        # Conver tot list.
+        list_all_fields = list(keys_fields)
+        list_keys = list(filter(is_variable_field, list_all_fields))
+        return list_keys
+
+    def jsonify(self) -> str:
+        """
+        A way to convert the entry into the right format to be jsonified to be returned.
+        # fixme: currently hard coded. Not working yet on dynamic update of 
+        :param entry:
+        :return:
+        """
+        list_fields = self.fields()
+
+        # Build Meta Dict
+        Meta: dict = {
+            "Instrument": "LocalMRIQuestionnaire",
+            "Visit": "V1",
+            "Candidate": self.CNBPID,
+            "DDE": False,
+        }
+
+        # Build LocalMRIQUestionnarie Dict
+        LocalMRIQuestionnaire: dict = {}
+
+        # Fill the dictionary.
+        for field in list_fields:
+            if (
+                field != "MRN"
+            ):  # omit MRN field during JSON dumping process to avoid leakage.
+                LocalMRIQuestionnaire[field] = getattr(self, field)
+
+        return json.dumps(
+            {"Meta": Meta, "LocalMRIQuestionnaire": LocalMRIQuestionnaire},
+            indent=4,
+            default=str,
+        )
+
 
 class DICOMTransitConfig(db.Model):
     """
@@ -359,3 +407,14 @@ class DICOMTransitConfig(db.Model):
 
     def __repr__(self):
         return f"<DICOMTransitConfig {self.id} by {self.user_id} on {self.timestamp}>"
+
+
+def is_variable_field(field_name: str):
+    """
+    Check if the field is a native field that does not contain data.
+    All native fields starts with "_", all variable field does not start with _
+    This is used in a filter function
+    :param field_name:
+    :return:
+    """
+    return field_name[0] != "_"
