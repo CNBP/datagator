@@ -8,7 +8,7 @@ from config_datagator import get_DataGator_DataBaseURI
 import sqlalchemy as sa
 
 secret_key = "secretkey1234"
-from sqlalchemy_utils.types.encrypted.encrypted_type import FernetEngine
+#from sqlalchemy_utils.types.encrypted.encrypted_type import FernetEngine
 
 import os
 
@@ -30,7 +30,7 @@ class DICOMTransitConfig(db.Model):
     id = db.Column(db.Integer, primary_key=True)  # hidden
     LORISurl = db.Column(URLType)
     LORISusername = db.Column(db.String)
-    LORISpassword = db.Column(EncryptedType(sa.Unicode, secret_key, FernetEngine))
+    LORISpassword = db.Column(db.String)
 
     timepoint_prefix = db.Column(db.String)
     institutionID = db.Column(db.String)

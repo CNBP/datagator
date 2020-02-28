@@ -8,7 +8,6 @@ import jwt
 from time import time
 import sqlalchemy as sa
 from sqlalchemy_utils import EncryptedType, URLType
-from sqlalchemy_utils.types.encrypted.encrypted_type import FernetEngine
 import os
 from dotenv import load_dotenv
 import json
@@ -348,7 +347,7 @@ class DICOMTransitConfig(db.Model):
     id = db.Column(db.Integer, primary_key=True)  # hidden
     LORISurl = db.Column(URLType)
     LORISusername = db.Column(db.String)
-    LORISpassword = db.Column(EncryptedType(db.Unicode, key, FernetEngine))
+    LORISpassword = db.Column(db.String)
 
     timepoint_prefix = db.Column(db.String)
     institutionID = db.Column(db.String)
