@@ -1,5 +1,5 @@
 import os
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from pathlib import Path
 
 path_DataGator = Path(os.path.abspath(os.path.dirname(__file__)))
@@ -27,7 +27,7 @@ def get_DataGator_DataBaseURI():
             )
 
         # Get the path of the database URL from the environment.
-        #URI = "sqlite:///" + os.environ.get("datagator_database")
+        # URI = "sqlite:///" + os.environ.get("datagator_database")
     return SQLALCHEMY_DATABASE_URI
 
 
@@ -35,6 +35,8 @@ class Config(object):
     """
     This class stores the configurations loaded from the environment. 
     """
+
+    load_dotenv(find_dotenv())
 
     SECRET_KEY = os.environ.get("SECRET_KEY") or "you-will-never-guess"
 
@@ -50,4 +52,4 @@ class Config(object):
     ADMINS = ["it@cnbp.ca"]
     POSTS_PER_PAGE = 5
     LANGUAGE = ["en-CA", "fr-CA"]
-    LOG_TO_STDOUT = os.environ.get("LOG_TO_STDOUT")
+    LOG_TO_STDOUT = True

@@ -3,12 +3,12 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_utils import URLType, EncryptedType
 from datetime import datetime
 from dotenv import load_dotenv
-from config_datagator import get_DataGator_DataBaseURI
+from config import get_DataGator_DataBaseURI
 
 import sqlalchemy as sa
 
 secret_key = "secretkey1234"
-#from sqlalchemy_utils.types.encrypted.encrypted_type import FernetEngine
+# from sqlalchemy_utils.types.encrypted.encrypted_type import FernetEngine
 
 import os
 
