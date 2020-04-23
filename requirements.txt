@@ -1,4 +1,4 @@
-flask-mail
+*flask-mail
 pyjwt
 werkzeug
 wtforms
